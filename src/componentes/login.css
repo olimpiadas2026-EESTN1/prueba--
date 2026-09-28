@@ -1,0 +1,295 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.login-page {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: #071d2b;
+  color: white;
+}
+
+.background {
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(5, 22, 33, 0.95) 0%,
+      rgba(5, 22, 33, 0.75) 40%,
+      rgba(5, 22, 33, 0.15) 100%
+    ),
+    url("../assets/travel.jpg");
+
+  background-size: cover;
+  background-position: center;
+}
+
+/* CONTENIDO */
+
+.content {
+  position: absolute;
+  right: 0;
+  top: 0;
+
+  width: 58%;
+  height: 100%;
+
+  padding: 25px 50px;
+}
+
+.menu {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.menu button {
+  border: none;
+  padding: 10px 20px;
+
+  border-radius: 25px;
+
+  background: rgba(0, 0, 0, 0.45);
+  color: white;
+
+  cursor: pointer;
+}
+
+.menu .active {
+  background: #087f9f;
+}
+
+/* TEXTO */
+
+.text {
+  position: absolute;
+
+  top: 35%;
+  left: 10%;
+}
+
+.text p {
+  font-size: 14px;
+  letter-spacing: 3px;
+  font-weight: bold;
+
+  color: #55d6d2;
+}
+
+.text h1 {
+  font-size: 48px;
+  line-height: 1.05;
+
+  margin: 10px 0 30px;
+
+  font-weight: 800;
+}
+
+/* OFERTA */
+
+.offer {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+
+  width: 330px;
+
+  padding: 15px 20px;
+
+  background: #087f9f;
+
+  border-radius: 5px;
+}
+
+.offer span {
+  font-size: 25px;
+}
+
+.offer div {
+  display: flex;
+  flex-direction: column;
+}
+
+.offer strong {
+  font-size: 15px;
+}
+
+.offer small {
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+/* LOGIN */
+
+.login-card {
+  position: absolute;
+
+  z-index: 5;
+
+  left: 12%;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  width: 290px;
+
+  padding: 35px;
+
+  background: rgba(20, 30, 35, 0.94);
+
+  border-radius: 10px;
+
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.logo {
+  width: 50px;
+  height: 50px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 0 auto 20px;
+
+  border-radius: 50%;
+
+  background: #55d6d2;
+
+  color: #073242;
+
+  font-size: 25px;
+}
+
+.login-card h2 {
+  text-align: center;
+
+  margin: 0;
+
+  font-size: 21px;
+}
+
+.subtitle {
+  text-align: center;
+
+  color: #aaa;
+
+  font-size: 12px;
+
+  margin-bottom: 25px;
+}
+
+.login-card input {
+  width: 100%;
+  height: 42px;
+
+  margin-bottom: 12px;
+
+  padding: 0 15px;
+
+  border: 1px solid #555;
+  border-radius: 25px;
+
+  outline: none;
+
+  background: transparent;
+
+  color: white;
+}
+
+.login-card input:focus {
+  border-color: #55d6d2;
+}
+
+.login-card input::placeholder {
+  color: #888;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-top: 5px;
+}
+
+.actions button {
+  border: none;
+
+  padding: 10px 22px;
+
+  border-radius: 25px;
+
+  background: #087f9f;
+
+  color: white;
+
+  cursor: pointer;
+}
+
+.actions button:hover {
+  background: #0998bb;
+}
+
+.actions a {
+  color: #aaa;
+
+  font-size: 9px;
+}
+
+.register {
+  text-align: center;
+
+  margin-top: 25px;
+
+  font-size: 10px;
+
+  color: #999;
+}
+
+.register a {
+  color: #55d6d2;
+
+  text-decoration: none;
+}
+
+/* CELULAR */
+
+@media (max-width: 800px) {
+
+  .content {
+    width: 100%;
+    padding: 20px;
+  }
+
+  .text {
+    display: none;
+  }
+
+  .login-card {
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    width: 300px;
+  }
+
+  .background {
+    background:
+      linear-gradient(
+        rgba(5, 22, 33, 0.8),
+        rgba(5, 22, 33, 0.9)
+      ),
+      url("../assets/travel.jpg");
+
+    background-size: cover;
+    background-position: center;
+  }
+}
