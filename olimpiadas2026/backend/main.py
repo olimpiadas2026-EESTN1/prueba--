@@ -1,4 +1,3 @@
-
 import os
 from pathlib import Path
 from typing import Any, List
@@ -11,28 +10,21 @@ import mercadopago
 import psycopg
 
 
-# ==============================================
-#              Cargar variables .env
-# ==============================================
+# ============================================================
+# CONFIGURACIÓN
+# ============================================================
 
-# Busca el .env en la raíz del proyecto:
-# olimp-26/.env
 BASE_DIR = Path(__file__).resolve().parents[2]
 ENV_FILE = BASE_DIR / ".env"
 
 load_dotenv(ENV_FILE)
 
-
-# ==============================================
-#          Configuración de la aplicación
-# ==============================================
-
 app = FastAPI()
 
 
-# ==============================================
-#             Configuración Mercado Pago
-# ==============================================
+# ============================================================
+# MERCADO PAGO
+# ============================================================
 
 MERCADOPAGO_TOKEN = os.getenv("MERCADOPAGO_TOKEN")
 
@@ -43,9 +35,9 @@ mp_sdk = (
 )
 
 
-# ==============================================
-#                  Modelos
-# ==============================================
+# ============================================================
+# MODELOS
+# ============================================================
 
 class ItemCarrito(BaseModel):
     id: Any
@@ -59,12 +51,9 @@ class Carrito(BaseModel):
     user: str
 
 
-# ==============================================
-#              Configuración de CORS
-# ==============================================
-
-# Permitir solicitudes desde cualquier origen.
-# Recuerda restringir esto antes de producción.
+# ============================================================
+# CORS
+# ============================================================
 
 app.add_middleware(
     CORSMiddleware,
@@ -75,18 +64,15 @@ app.add_middleware(
 )
 
 
-# ==============================================
-#          Conexión a PostgreSQL / Supabase
-# ==============================================
+# ============================================================
+# BASE DE DATOS
+# ============================================================
 
 DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
 
-
-
-
-# URL de conexión a PostgreSQL
 hostURL = (
-    f"postgresql://postgres.dncdqfmfixojxprdlbkf:{DATABASE_PASSWORD}@aws-0-us-west-2.pooler.supabase.com:5432/postgres"
+    f"postgresql://postgres.dncdqfmfixojxprdlbkf:{DATABASE_PASSWORD}"
+    "@aws-0-us-west-2.pooler.supabase.com:5432/postgres"
 )
 
 
@@ -94,11 +80,10 @@ def get_connection():
     return psycopg.connect(hostURL)
 
 
-# ==============================================
-#                  Rutas
-# ==============================================
+# ============================================================
+# ROUTERS
+# ============================================================
 
-# Importar y registrar todos los routers
 from roots.autos import router as autos_routers
 from roots.clientes import router as clientes_routers
 from roots.excursiones import router as excursiones_routers
@@ -107,7 +92,6 @@ from roots.ventas import router as ventas_routers
 from roots.viajes import router as viajes_routers
 
 
-# Registrar routers
 app.include_router(autos_routers, prefix="/autos")
 app.include_router(clientes_routers, prefix="/clientes")
 app.include_router(excursiones_routers, prefix="/excursiones")
@@ -116,9 +100,9 @@ app.include_router(ventas_routers, prefix="/ventas")
 app.include_router(viajes_routers, prefix="/viajes")
 
 
-# ==============================================
-#                  Health Check
-# ==============================================
+# ============================================================
+# HEALTH CHECK
+# ============================================================
 
 @app.get("/health")
 def health_check():
@@ -129,12 +113,20 @@ def health_check():
     }
 
 
-# ==============================================
-#                Crear carrito
-# ==============================================
+# ============================================================
+# MERCADO PAGO - CREAR PREFERENCIA
+# ============================================================
 
 @app.post("/carrito")
 def post_carrito(carrito: Carrito):
+
+    print("====================================")
+    print("INICIANDO CREACIÓN DE PREFERENCIA")
+    print("====================================")
+
+    # --------------------------------------------------------
+    # Verificar Mercado Pago
+    # --------------------------------------------------------
 
     if not mp_sdk:
         return {
@@ -144,9 +136,38 @@ def post_carrito(carrito: Carrito):
             "detalle": "Falta el token de Mercado Pago",
         }
 
+    # --------------------------------------------------------
+    # Verificar carrito
+    # --------------------------------------------------------
+
+    if not carrito.items:
+        return {
+            "error": "El carrito está vacío.",
+            "detalle": "No se recibieron productos.",
+        }
+
+    # --------------------------------------------------------
+    # Mostrar productos recibidos
+    # --------------------------------------------------------
+
+    print("USUARIO:", carrito.user)
+    print("PRODUCTOS:")
+
+    for item in carrito.items:
+        print(
+            f"- {item.title} | "
+            f"Precio: {item.unit_price} | "
+            f"Cantidad: {item.quantity}"
+        )
+
+    # --------------------------------------------------------
+    # Crear datos de Mercado Pago
+    # --------------------------------------------------------
+
     preference_data = {
         "items": [
             {
+                "id": str(item.id),
                 "title": item.title,
                 "quantity": item.quantity,
                 "unit_price": float(item.unit_price),
@@ -154,16 +175,32 @@ def post_carrito(carrito: Carrito):
             }
             for item in carrito.items
         ],
+
         "metadata": {
             "user": carrito.user,
         },
+
+        # IMPORTANTE:
+        # Dejamos las URLs de retorno, pero quitamos
+        # auto_return porque estás trabajando en localhost.
+        #
+        # Mercado Pago no permite usar localhost como URL
+        # válida para auto_return.
         "back_urls": {
             "success": "http://localhost:5173/",
             "failure": "http://localhost:5173/",
             "pending": "http://localhost:5173/",
         },
-        "auto_return": "approved",
     }
+
+    print("====================================")
+    print("PREFERENCE DATA:")
+    print(preference_data)
+    print("====================================")
+
+    # --------------------------------------------------------
+    # Crear preferencia
+    # --------------------------------------------------------
 
     try:
 
@@ -171,7 +208,17 @@ def post_carrito(carrito: Carrito):
             preference_data
         )
 
+        print("====================================")
+        print("RESPUESTA MERCADO PAGO:")
+        print(preference_response)
+        print("====================================")
+
+        # ----------------------------------------------------
+        # Verificar respuesta
+        # ----------------------------------------------------
+
         if "response" not in preference_response:
+
             return {
                 "error": "No se pudo crear la preferencia de pago.",
                 "detalle": preference_response,
@@ -179,21 +226,63 @@ def post_carrito(carrito: Carrito):
 
         preference = preference_response["response"]
 
+        # ----------------------------------------------------
+        # Verificar errores devueltos por Mercado Pago
+        # ----------------------------------------------------
+
+        if "error" in preference:
+
+            return {
+                "error": "Mercado Pago rechazó la creación de la preferencia.",
+                "detalle": preference,
+            }
+
+        # ----------------------------------------------------
+        # Verificar ID
+        # ----------------------------------------------------
+
         if "id" not in preference:
+
             return {
                 "error": "No se recibió la preferencia de Mercado Pago.",
                 "detalle": preference,
             }
 
+        # ----------------------------------------------------
+        # Obtener URL de pago
+        # ----------------------------------------------------
+
+        init_point = preference.get("init_point")
+        sandbox_init_point = preference.get("sandbox_init_point")
+
+        print("====================================")
+        print("PREFERENCIA CREADA CORRECTAMENTE")
+        print("ID:", preference["id"])
+        print("INIT POINT:", init_point)
+        print("SANDBOX INIT POINT:", sandbox_init_point)
+        print("====================================")
+
+        # ----------------------------------------------------
+        # Respuesta al frontend
+        # ----------------------------------------------------
+
         return {
             "id": preference["id"],
-            "init_point": preference.get("init_point"),
-            "sandbox_init_point": preference.get(
-                "sandbox_init_point"
-            ),
+            "init_point": init_point,
+            "sandbox_init_point": sandbox_init_point,
         }
 
+    # --------------------------------------------------------
+    # Error general
+    # --------------------------------------------------------
+
     except Exception as e:
+
+        print("====================================")
+        print("ERROR MERCADO PAGO")
+        print("====================================")
+        print(str(e))
+        print("====================================")
 
         return {
             "error": "Ocurrió un error al comunicarse con Mercado Pago.",
