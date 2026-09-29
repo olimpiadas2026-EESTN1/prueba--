@@ -4,8 +4,8 @@ from crudExcursiones import paqueteViajesExcursion
 from datetime import datetime
 import os
 
-contraseña = os.getenv("DATABASE_PASSWORD")
-dns = f"postgresql://postgres:{contraseña}@db.dncdqfmfixojxprdlbkf.supabase.co:5432/postgres"
+DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
+dns = f"postgresql://postgres:{DATABASE_PASSWORD}@db.dncdqfmfixojxprdlbkf.supabase.co:5432/postgres"
 conexionViajes = psycopg.connect(dns) 
 cursor = conexionViajes.cursor()
 

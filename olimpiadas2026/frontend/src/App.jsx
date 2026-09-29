@@ -8,7 +8,7 @@ import SingUp from './componentes/sing-up'
 import Vuelos from './componentes/vuelos'
 import Inside from './componentes/inside-image'
 import Micros from './componentes/micros'
-const url ="https://backend-carrito-alpha.vercel.app/viajes/obtener"
+const url = "http://127.0.0.1:8000/viajes/obtener";
 import { AuthContext } from './AuthContext'
 import { useContext,useEffect } from 'react'
 import CustomAlert from './componentes/alerta'

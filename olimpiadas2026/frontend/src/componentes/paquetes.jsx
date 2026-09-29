@@ -17,15 +17,15 @@ const Paquetes = () => {
   const [mostrarDiv, setMostrarDiv] = useState(false);
   const [visibleDiv, setVisibleDiv] = useState(false);
   const [data, setData] = useState([]);
-      const{dataPaquetes,setDataPaquetes}= useContext(AuthContext)
+  const{dataPaquetes,setDataPaquetes}= useContext(AuthContext)
   const [vueloSeleccionado, setVueloSeleccionado] = useState(null);
-const{ autos,setAutos}= useContext(AuthContext);
-const {excursiones,setExcursiones} = useContext(AuthContext);
-const {eleccionMoneda, setEleccionMoneda} =useContext(AuthContext);
-const {precio,setPrecio} = useContext(AuthContext)
+  const{ autos,setAutos}= useContext(AuthContext);
+  const {excursiones,setExcursiones} = useContext(AuthContext);
+  const {eleccionMoneda, setEleccionMoneda} =useContext(AuthContext);
+  const {precio,setPrecio} = useContext(AuthContext)
   const url = "https://backend-carrito-alpha.vercel.app/paqueteDeViajes/obtener";
- const url_autos = "https://backend-carrito-alpha.vercel.app/autos/obtener";
-const url_exc =  "https://backend-carrito-alpha.vercel.app/excursiones/obtener";
+  const url_autos = "https://backend-carrito-alpha.vercel.app/autos/obtener";
+  const url_exc =  "https://backend-carrito-alpha.vercel.app/excursiones/obtener";
 
   const handleAbrirDiv = () => {
     document.body.style.overflow = "hidden";

@@ -3,8 +3,8 @@ import psycopg
 from crudViajes import convertirDate, convertirHora, restarCupoTPV, restarCupoTVS,consultarCuposTPV,consultarCuposTVS
 import os
 
-contraseña = os.getenv("DATABASE_PASSWORD")
-dns = f"postgresql://postgres:{contraseña}@db.dncdqfmfixojxprdlbkf.supabase.co:5432/postgres"
+DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
+dns = f"postgresql://postgres.dncdqfmfixojxprdlbkf:{DATABASE_PASSWORD}@aws-0-us-west-2.pooler.supabase.com:5432/postgres"
 conexionViajes = psycopg.connect(dns)
 cursor = conexionViajes.cursor()
 

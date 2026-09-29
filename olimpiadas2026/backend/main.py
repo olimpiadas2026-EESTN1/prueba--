@@ -86,8 +86,7 @@ DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
 
 # URL de conexión a PostgreSQL
 hostURL = (
-    f"postgresql://postgres:{DATABASE_PASSWORD}"
-    "@db.dncdqfmfixojxprdlbkf.supabase.co:5432/postgres"
+    f"postgresql://postgres.dncdqfmfixojxprdlbkf:{DATABASE_PASSWORD}@aws-0-us-west-2.pooler.supabase.com:5432/postgres"
 )
 
 
