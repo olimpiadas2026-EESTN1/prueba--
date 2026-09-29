@@ -1,3 +1,4 @@
+import { API_URL, apiFetch } from "./api";
 import { Routes, Route, useLocation,useNavigate,Link } from 'react-router-dom' 
 import './App.css'
 
@@ -8,31 +9,40 @@ import SingUp from './componentes/sing-up'
 import Vuelos from './componentes/vuelos'
 import Inside from './componentes/inside-image'
 import Micros from './componentes/micros'
-const url = "http://127.0.0.1:8000/viajes/obtener";
+const url = `${API_URL}/viajes/obtener`;
 import { AuthContext } from './AuthContext'
-import { useContext,useEffect } from 'react'
-import CustomAlert from './componentes/alerta'
+import { useContext,useEffect,useState } from 'react'
 import Paquetes from './componentes/paquetes'
 function App_header() {
+  const [apiError, setApiError] = useState("");
   const navigate = useNavigate();
 const {precio} =useContext(AuthContext)
  const {data, setData} =  useContext(AuthContext);
-  const location = useLocation(); 
+  const location = useLocation();
+  const isHome = location.pathname === "/";
   const { isLoggedIn,setIsLoggedIn } = useContext(AuthContext);
   const {eleccionMoneda, setEleccionMoneda} =useContext(AuthContext);
   useEffect(() => {
-  fetch(url)
+  if (!isHome) return;
+  setApiError("");
+  apiFetch(url)
     .then(res => res.json())
-    .then(json => setData(json));
-}, []);
+    .then(json => {
+      if (!Array.isArray(json)) throw new Error("El servidor no devolvió una lista de viajes.");
+      setData(json);
+    })
+    .catch(error => setApiError(error.message));
+}, [isHome, setData]);
   return (
     <>
 
   <main className="main-cont">
+  {isHome && apiError && <p role="alert">{apiError}</p>}
   {location.pathname !== "/login" && location.pathname !== "/sing-up" && (
     <>
 
-      <Inside />
+      <Inside showHero={isHome} />
+      {isHome && <>
 
       {/* Rediseño principal: esta sección marca la nueva identidad premium de la agencia.
           Se trabajó en la narrativa del home para que parezca una landing más elegante,
@@ -51,7 +61,7 @@ const {precio} =useContext(AuthContext)
         </div>
       </div>
 
-      {isLoggedIn && <CustomAlert />}
+
 
       {/* El precio se estandarizó en ARS para evitar mezclas con USD.
           Esto refleja la realidad comercial del proyecto y simplifica la experiencia
@@ -77,6 +87,7 @@ const {precio} =useContext(AuthContext)
           <li>🧳 Viajá liviano para evitar cargos por equipaje.</li>
         </ul>
       </div>
+      </>}
     </>
   )}
 

@@ -1,10 +1,9 @@
-import { Outlet , Link} from "react-router-dom"
-const Header_buttons = ()=>{
-      return <div className="buttons">
-        <Link className="link" to={"/"}>Home</Link>   
-        <Link className="link" to={"/paquetes"}>Paquetes</Link>   
-        <Link className="link" to={"/vuelos"}>Vuelos</Link>   
-        <Link className="link" to={"/micros"}>Micros</Link>   
-        </div>
+import { NavLink } from "react-router-dom";
+
+export default function Header_buttons() {
+  return <nav className="buttons" aria-label="Navegación principal">
+    {[["/", "Inicio"], ["/paquetes", "Paquetes"], ["/vuelos", "Vuelos"], ["/micros", "Micros"]].map(([to, label]) =>
+      <NavLink key={to} to={to} end className={({ isActive }) => `link${isActive ? " active" : ""}`}>{label}</NavLink>
+    )}
+  </nav>;
 }
-export default Header_buttons

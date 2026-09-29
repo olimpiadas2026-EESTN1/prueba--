@@ -1,10 +1,11 @@
+import { API_URL, apiFetch } from "../api";
 import Login_buttons from "./buttons_login"
 import Header_buttons from "./headers-buttons"
 import { data, useNavigate } from "react-router-dom";
 
   import { AuthContext } from "../AuthContext";
   import { useContext,useState,useEffect } from 'react'
-  const Inside = ()=>{
+  const Inside = ({ showHero = true })=>{
   const { mail_guardado,setMail_guardado} = useContext(AuthContext);
   const [precioTotal,setPrecioTotal] = useState(0)
   const { listaCarrito, setListaCarrito} = useContext(AuthContext);
@@ -26,7 +27,7 @@ import { data, useNavigate } from "react-router-dom";
   const {precio,setPrecio} =useContext(AuthContext)
   const urlDolar="https://dolarapi.com/v1/dolares/oficial"
   const [paquetesFiltrados,setPaquetesFiltrados] = useState([])
-  const url = "https://backend-carrito-alpha.vercel.app/paqueteDeViajes/obtener";
+  const url = `${API_URL}/paqueteDeViajes/obtener`;
     useEffect(() => {
   fetch(urlDolar)
   .then(data => data.json())
@@ -87,7 +88,7 @@ const handleEnviarVenta = async (event) => {
       quantity: 1,
     }));
 
-    const response = await fetch("https://backend-carrito-alpha.vercel.app/carrito", {
+    const response = await apiFetch(`${API_URL}/carrito`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -135,9 +136,10 @@ const handlerFiltar = () => {
 };
 
 useEffect(() => {
+    if (!showHero) return;
     const fetchData = async () => {
       try {
-        const response = await fetch(url);
+        const response = await apiFetch(url);
         if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
         const json = await response.json();
         setDataPaquetes(json)
@@ -149,14 +151,14 @@ useEffect(() => {
     };
 
     fetchData();
-  }, []);
+  }, [showHero]);
  
 return <>
      
   {/* Bloque visual principal del landing.
       Se mantuvo una estética tipo agencia de viajes con fondo de imagen,
       cabecera glassmorphism y botones más armónicos con el resto del diseño. */}
-<div className='inside-image'>
+<div className={`inside-image${showHero ? "" : " category-shell"}`}>
   <header className='header'>
     <div className="cont-header">
         
@@ -177,15 +179,19 @@ return <>
         {/* BOTÓN PARA DESLOGEARSE */}
         {isLoggedIn && (
           <div className="user-actions">
-            <a className="link" onClick={handleLogout} href="#">Log out</a>
+            <button type="button" className="account-button" onClick={handleLogout}>Cerrar sesión</button>
           </div>
         )}
-        <a onClick={handleAbrirCarrito} className="link"><i className="fa-solid fa-cart-shopping" ></i></a>
+        <button type="button" onClick={handleAbrirCarrito} className="cart-button" aria-label={`Abrir carrito, ${listaCarrito.length} productos`}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M2 3h3l3 12h11l3-9H6"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+          <span>Carrito</span><span className="cart-count">{listaCarrito.length}</span>
+        </button>
         </div>
     </div>
 
   </header>
 
+ {showHero && <>
  {/* HERO DE BUSQUEDA */}
  <div className="travel-hero">
   <div className="travel-copy">
@@ -291,6 +297,7 @@ return <>
 <button onClick={handlerFiltar} className="butoon">Filtrar</button>
   </div>
  </div>
+ </>}
   {/* CARRITO */}
 {mostrarCarrito && (
   <div className={`carrito ${animandoCierre ? "fade-out" : "fade-in"}`}>

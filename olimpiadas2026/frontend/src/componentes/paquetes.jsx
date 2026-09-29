@@ -1,3 +1,5 @@
+import CategoryHeading from "./category-heading";
+import { API_URL, apiFetch } from "../api";
 import { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../AuthContext";
 
@@ -14,6 +16,7 @@ const Paquetes = () => {
 
   const { listaCarrito, setListaCarrito } = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
   const [mostrarDiv, setMostrarDiv] = useState(false);
   const [visibleDiv, setVisibleDiv] = useState(false);
   const [data, setData] = useState([]);
@@ -23,9 +26,9 @@ const Paquetes = () => {
   const {excursiones,setExcursiones} = useContext(AuthContext);
   const {eleccionMoneda, setEleccionMoneda} =useContext(AuthContext);
   const {precio,setPrecio} = useContext(AuthContext)
-  const url = "https://backend-carrito-alpha.vercel.app/paqueteDeViajes/obtener";
-  const url_autos = "https://backend-carrito-alpha.vercel.app/autos/obtener";
-  const url_exc =  "https://backend-carrito-alpha.vercel.app/excursiones/obtener";
+  const url = `${API_URL}/paqueteDeViajes/obtener`;
+  const url_autos = `${API_URL}/autos/obtener`;
+  const url_exc =  `${API_URL}/excursiones/obtener`;
 
   const handleAbrirDiv = () => {
     document.body.style.overflow = "hidden";
@@ -51,13 +54,13 @@ const Paquetes = () => {
    useEffect(() => {
     const fetchData3 = async () => {
       try {
-        const response = await fetch(url_exc);
+        const response = await apiFetch(url_exc);
         if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
         const json = await response.json();
         setExcursiones(json);
         setLoading(false);
       } catch (error) {
-        console.error("Error al cargar los datos:", error);
+        setErrorMessage(error.message);
         setLoading(false);
       }
     };
@@ -67,13 +70,13 @@ const Paquetes = () => {
  useEffect(() => {
     const fetchDataa = async () => {
       try {
-        const response = await fetch(url_autos);
+        const response = await apiFetch(url_autos);
         if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
         const json = await response.json();
         setAutos(json);
         setLoading(false);
       } catch (error) {
-        console.error("Error al cargar los datos:", error);
+        setErrorMessage(error.message);
         setLoading(false);
       }
     };
@@ -84,7 +87,7 @@ const Paquetes = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(url);
+        const response = await apiFetch(url);
         if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
         const json = await response.json();
         setDataPaquetes(json)
@@ -96,7 +99,7 @@ const Paquetes = () => {
         setData(vuelosConColor);
         setLoading(false);
       } catch (error) {
-        console.error("Error al cargar los datos:", error);
+        setErrorMessage(error.message);
         setLoading(false);
       }
     };
@@ -109,7 +112,9 @@ const Paquetes = () => {
   }, [listaCarrito]);
 
   return (
-    <div className="divConNombre fade-in-viajes">
+    <div className="divConNombre fade-in-viajes category-page">
+      <CategoryHeading title="Paquetes de viaje" description="Compará estadías y destinos para organizar tu próxima escapada." />
+      {errorMessage && <p role="alert">{errorMessage}</p>}
       {visibleDiv && vueloSeleccionado && (
         <>
           <div className="overlay fade-out" onClick={handleCerrarDiv}></div>
@@ -160,7 +165,7 @@ const Paquetes = () => {
         </>
       )}
 
-      <h2 className="text_vuelos">Paquetes de vuelo</h2>
+      <h2 className="text_vuelos">Opciones disponibles</h2>
 
       <div className="container-div">
         {loading ? (
@@ -187,7 +192,7 @@ data.map((vuelo, index) => {
         opacity: disponible ? 1 : 0.5
       }}
     >
-      <h1 className="titulo-compra">{vuelo.Destino}</h1>
+      <h3 className="titulo-compra">{vuelo.Destino}</h3>
       <p className="parrafo_compra">{formatARS(vuelo.Precio)}</p>
       
       <p className="parrafo_compra">{vuelo.Descripcion}</p>

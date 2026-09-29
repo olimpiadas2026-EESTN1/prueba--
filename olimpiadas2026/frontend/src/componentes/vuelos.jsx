@@ -1,3 +1,5 @@
+import CategoryHeading from "./category-heading";
+import { API_URL, apiFetch } from "../api";
 import { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../AuthContext";
 
@@ -14,6 +16,7 @@ const Vuelos = () => {
 
   const { listaCarrito, setListaCarrito } = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
   const [mostrarDiv, setMostrarDiv] = useState(false);
   const [visibleDiv, setVisibleDiv] = useState(false);
   const {data, setData} =  useContext(AuthContext);
@@ -21,7 +24,7 @@ const Vuelos = () => {
   const [vueloSeleccionado, setVueloSeleccionado] = useState(null);
   const {eleccionMoneda, setEleccionMoneda} =useContext(AuthContext);
 const {precio} =useContext(AuthContext)
-  const url = "https://backend-carrito-alpha.vercel.app/viajes/obtener";
+  const url = `${API_URL}/viajes/obtener`;
   const handleAbrirDiv = () => {
     document.body.style.overflow = "hidden";
     setVisibleDiv(true);
@@ -46,7 +49,7 @@ const {precio} =useContext(AuthContext)
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(url);
+        const response = await apiFetch(url);
         if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
         const json = await response.json();
           setDatos(json)
@@ -58,7 +61,8 @@ const {precio} =useContext(AuthContext)
         setData(vuelosConColor);
         setLoading(false);
       } catch (error) {
-        console.log(error);
+        setErrorMessage(error.message);
+        setLoading(false);
       }
     };
     fetchData();
@@ -69,10 +73,12 @@ const {precio} =useContext(AuthContext)
     localStorage.setItem("carrito", JSON.stringify(listaCarrito));
   }, [listaCarrito]);
 
-  const vuelosFiltrados = data?.filter((vuelo) => vuelo.Transporte === "Avion") || [];
+  const vuelosFiltrados = data?.filter((vuelo) => ['avion', 'avión'].includes(String(vuelo.Transporte || "").trim().toLowerCase())) || [];
 
   return (
-    <div className="divConNombre fade-in-viajes">
+    <div className="divConNombre fade-in-viajes category-page">
+      <CategoryHeading title="Vuelos" description="Explorá destinos, compará precios y elegí tu próximo vuelo." />
+      {errorMessage && <p role="alert">{errorMessage}</p>}
       
       {visibleDiv && vueloSeleccionado && (
         <>
@@ -129,7 +135,9 @@ const {precio} =useContext(AuthContext)
         </>
       )}
 
-      <h2 className="text_vuelos">Vuelos desde Argentina</h2>
+      <h2 className="text_vuelos">Opciones disponibles</h2>
+      {loading && <p role="status">Cargando viajes…</p>}
+      {!loading && !errorMessage && vuelosFiltrados.length === 0 && <p role="status">Todavía no hay viajes disponibles en esta categoría.</p>}
       <div className="container-div">
 {vuelosFiltrados.map((vuelo, index) => {
   const disponible = vuelo.Cupos > 0 && vuelo.Estado?.toLowerCase() === "disponible";
@@ -150,7 +158,7 @@ const {precio} =useContext(AuthContext)
         }
       }}
     >
-      <h1 className="titulo-compra">{vuelo.Destino}</h1>
+      <h3 className="titulo-compra">{vuelo.Destino}</h3>
       <p className="parrafo_compra">{formatARS(vuelo.Precio)}</p>
  
       <p className="parrafo_compra">{vuelo.Descripcion}</p>

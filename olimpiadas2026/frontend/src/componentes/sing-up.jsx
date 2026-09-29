@@ -1,3 +1,4 @@
+import { API_URL, apiFetch } from "../api";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Outlet , Link} from "react-router-dom"
@@ -6,43 +7,27 @@ const SingUp = () => {
   const [password, setPassword] = useState("");
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
-  const [dict, setDict] = useState(null);
   const navigate = useNavigate();
-  
-  // Manejo del formulario
-  const handleLogin = (event) => {
-    event.preventDefault();
-    
-    const diccionario = {
-      nombre:nombre,
-      apellido:apellido,
-      contraseña: password,
-      correo_electronico: mail,
-    };
-    
-    setDict(diccionario);
-    navigate("/login")
-  };
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  // Enviar datos cuando dict cambie
-  useEffect(() => {
-    fetch("https://backend-carrito-filb.vercel.app/clientes/ingresar", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(dict),
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          const errorText = await res.text();
-          throw new Error(`Server error: ${res.status} ${errorText}`);
-        }
-        return res.json();
-      })
-      .then((res) => console.log("Cliente registrado"))
-      .catch(console.error);
-  }, [dict]);
+  const handleLogin = async (event) => {
+    event.preventDefault();
+    setError("");
+    setSubmitting(true);
+    try {
+      await apiFetch(`${API_URL}/clientes/ingresar`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre: nombre.trim(), apellido: apellido.trim(), contraseña: password, correo_electronico: mail.trim() }),
+      });
+      navigate("/login");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   // El registro comparte la misma línea visual que el login para mantener
   // coherencia entre todas las pantallas de acceso. El objetivo es que la
@@ -87,7 +72,8 @@ const SingUp = () => {
           <input required className="input" type="password" name="contraseña" placeholder="Ingrese su contraseña" onChange={(event) => setPassword(event.target.value)} />
 
           <p className="linkkk">¿Ya tenés una cuenta? <Link to={"/login"}>Ingresá ahora</Link></p>
-          <button type="submit" className="auth-submit">Registrarme</button>
+          {error && <p role="alert">{error}</p>}
+          <button type="submit" className="auth-submit" disabled={submitting}>{submitting ? "Registrando…" : "Registrarme"}</button>
         </form>
       </div>
     </div>

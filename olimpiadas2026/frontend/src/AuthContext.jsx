@@ -5,7 +5,7 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [data, setData] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem("isLoggedIn") === "true");
   const [listaCarrito, setListaCarrito] = useState(() => {
     const guardado = localStorage.getItem("carrito");
     return guardado ? JSON.parse(guardado) : [];

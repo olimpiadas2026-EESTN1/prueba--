@@ -1376,3 +1376,33 @@ button:hover {
     margin-top: auto;
     font-weight:500;
 }
+/* Mantener cuenta y carrito visibles en ambos estados de sesión. */
+.icn { flex-wrap: wrap; justify-content: flex-end; max-width: 100%; }
+.user-actions { display: flex; align-items: center; }
+.account-button, .cart-button {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  min-height: 44px; padding: .65rem .9rem; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.09);
+  color: #fff; font: inherit; font-weight: 700; cursor: pointer; white-space: nowrap;
+  flex-shrink: 0;
+}
+.cart-button { background: #1769c2; }
+.cart-button svg { flex-shrink: 0; }
+.cart-count { min-width: 1.5rem; border-radius: 50%; background: #fff; color: #154577; padding: .1rem; }
+.account-button:focus-visible, .cart-button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+@media (max-width: 700px) {
+  .cont-header .icn { width: 100%; justify-content: center; border-radius: 18px; }
+  .cont-header .buttons { order: 3; flex-basis: 100%; }
+}
+
+/* Páginas de categoría: encabezado compacto y catálogo como contenido principal. */
+.inside-image.category-shell { min-height: 0; padding-bottom: 1.5rem; background-image: linear-gradient(120deg, #102e4a, #215b86); }
+.category-page { padding: 2rem 0 4rem; max-width: 1200px; }
+.category-heading { margin-bottom: 2rem; text-align: left; }
+.category-heading a { color: #246ba8; font-weight: 700; }
+.category-heading h1 { color: #153c60; font-size: clamp(2rem, 5vw, 3rem); margin: 1rem 0 .75rem; }
+.category-heading p { color: #465e72; font-size: 1.1rem; max-width: 650px; }
+.category-page .container-div { gap: 1.25rem; }
+.category-page .text_vuelos { text-align: left; margin-bottom: 1.25rem; }
+.buttons a.active { background: #fff; color: #153c60; border-color: #fff; }
+@media (max-width: 600px) { .category-page { width: 92%; padding-top: 1.25rem; } }
