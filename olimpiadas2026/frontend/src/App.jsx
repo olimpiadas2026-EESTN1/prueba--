@@ -1,3 +1,4 @@
+import AdminPage from "./admin/AdminPage";
 import { API_URL, apiFetch } from "./api";
 import { Routes, Route, useLocation,useNavigate,Link } from 'react-router-dom' 
 import './App.css'
@@ -33,6 +34,7 @@ const {precio} =useContext(AuthContext)
     })
     .catch(error => setApiError(error.message));
 }, [isHome, setData]);
+  if (location.pathname === "/admin" || location.pathname.startsWith("/admin/")) return <AdminPage />;
   return (
     <>
 
@@ -115,6 +117,7 @@ const {precio} =useContext(AuthContext)
         <li><Link to={"/paquetes"}>Paquetes</Link></li>
         <li><Link to={"/micros"}>Micros</Link></li>
         <li><Link to={"/login"}>Log in</Link></li>
+        <li><Link to="/admin">Administración</Link></li>
       </ul>
     </div>
     <div>

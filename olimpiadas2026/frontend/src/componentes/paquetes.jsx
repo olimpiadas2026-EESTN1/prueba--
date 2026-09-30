@@ -45,8 +45,8 @@ const Paquetes = () => {
   const handlerAgregar = () => {
     if (vueloSeleccionado) {
       setListaCarrito(prev => {
-        const existe = prev.some(item => item.Codigo === vueloSeleccionado.Codigo);
-        return existe ? prev : [...prev, vueloSeleccionado];
+        const existe = prev.some(item => item.Codigo === vueloSeleccionado.Codigo && item.tipoProducto === "paquete");
+        return existe ? prev : [...prev, { ...vueloSeleccionado, tipoProducto: "paquete" }];
       });
       handleCerrarDiv();
     }

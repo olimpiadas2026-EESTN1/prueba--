@@ -8,7 +8,7 @@ const Login = () => {
   const navigate = useNavigate();
   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
   const { mail_guardado,setMail_guardado} = useContext(AuthContext);
-  const url = `${API_URL}/clientes/validarContrasena`;
+  const url = `${API_URL}/clientes/sesion`;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -29,7 +29,8 @@ const Login = () => {
         body: JSON.stringify({ usuarioIngresado: email.trim(), contraseñaIngresada: password }),
       });
       const valid = await response.json();
-      if (valid !== true) throw new Error("Correo o contraseña incorrectos.");
+      if (!valid.token) throw new Error("Correo o contraseña incorrectos.");
+      sessionStorage.setItem("buyer_token", valid.token);
       setMail_guardado(email.trim());
       localStorage.setItem("mail_guardado", JSON.stringify(email.trim()));
       localStorage.setItem("isLoggedIn", "true");
@@ -82,6 +83,7 @@ const Login = () => {
           {error && <p role="alert">{error}</p>}
           <button type="submit" className="auth-submit" disabled={submitting}>{submitting ? "Ingresando…" : "Entrar"}</button>
         </form>
+        <Link className="admin-entry" to="/admin">Entrar como administrador</Link>
       </div>
     </div>
   );

@@ -1,0 +1,63 @@
+from fastapi import APIRouter, Depends, Header, HTTPException
+from pydantic import BaseModel, Field
+from modulos.administradores import authenticate, require_admin, logout
+
+router = APIRouter(prefix='/admin', tags=['Administración'])
+
+class LoginAdmin(BaseModel):
+    email: str = Field(min_length=3, max_length=254)
+    password: str = Field(min_length=1, max_length=72)
+
+@router.post('/login')
+def login(data: LoginAdmin):
+    try:
+        return authenticate(data.email, data.password)
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(503, 'No se pudo validar la cuenta administrativa')
+
+@router.get('/me')
+def me(admin=Depends(require_admin)):
+    return admin
+
+@router.post('/logout')
+def close_session(admin=Depends(require_admin), authorization: str = Header(default='')):
+    logout(authorization)
+    return {'ok': True}
+
+from modulos import gestion
+from typing import Any
+from fastapi import Query
+
+@router.get('/resumen')
+def overview(admin=Depends(require_admin)):
+    return gestion.summary()
+
+@router.get('/usuarios')
+def users(q: str = Query(default='', max_length=100), admin=Depends(require_admin)):
+    return gestion.users(q)
+
+@router.get('/usuarios/{user_id}')
+def user_profile(user_id: int, admin=Depends(require_admin)):
+    return gestion.profile(user_id)
+
+@router.get('/pedidos')
+def orders(usuario_id: int = None, admin=Depends(require_admin)):
+    return gestion.orders(usuario_id)
+
+@router.get('/ventas')
+def sales(usuario_id: int = None, admin=Depends(require_admin)):
+    return gestion.sales(usuario_id)
+
+@router.get('/catalogo/{kind}')
+def catalog(kind: str, admin=Depends(require_admin)):
+    return gestion.catalog(kind)
+
+@router.patch('/datos/{kind}/{key}')
+def edit(kind: str, key: int, changes: dict[str, Any], admin=Depends(require_admin)):
+    return gestion.update(kind,key,changes,admin)
+
+@router.get('/auditoria')
+def audit(admin=Depends(require_admin)):
+    return gestion.query('SELECT id,ua_id,creado_en,entidad,registro_id,cambios FROM admin_auditoria ORDER BY id DESC LIMIT 200')

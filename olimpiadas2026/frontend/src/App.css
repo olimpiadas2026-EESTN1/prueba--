@@ -1406,3 +1406,27 @@ button:hover {
 .category-page .text_vuelos { text-align: left; margin-bottom: 1.25rem; }
 .buttons a.active { background: #fff; color: #153c60; border-color: #fff; }
 @media (max-width: 600px) { .category-page { width: 92%; padding-top: 1.25rem; } }
+
+.admin-page { max-width: 1150px; margin: auto; padding: 2rem; color: #16344c; }
+.admin-form { display: grid; gap: 1rem; max-width: 600px; margin: 2rem 0; text-align: left; }
+.admin-form label { display: grid; gap: .4rem; }
+.admin-form input, .admin-form select { padding: .7rem; border: 1px solid #9caab6; border-radius: 8px; }
+.admin-page button { padding: .7rem 1rem; border-radius: 8px; cursor: pointer; }
+.admin-tabs { display: flex; flex-wrap: wrap; gap: 1rem; margin: 2rem 0; }
+.admin-tabs [aria-pressed=true] { background: #164f80; color: white; }
+.admin-table { overflow-x: auto; }
+.admin-table table { border-collapse: collapse; width: 100%; }
+.admin-table th, .admin-table td { border: 1px solid #d5dfe7; padding: .6rem; text-align: left; }
+
+.admin-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin:1.5rem 0; }
+.admin-stats article, .admin-detail { padding:1.5rem; border:1px solid #c8d7e4; border-radius:12px; background:#f3f8fc; }
+.admin-stats strong { font-size:2rem; }
+.admin-detail { margin:2rem 0; }
+.admin-search { display:flex; flex-wrap:wrap; gap:1rem; margin:1rem 0; }
+.admin-table pre { max-width:400px; white-space:pre-wrap; overflow-wrap:anywhere; }
+
+.admin-entry { display: inline-flex; align-items: center; justify-content: center; padding: .7rem 1rem; margin-top: 1rem; border: 1px solid #246ba8; border-radius: 12px; color: #174e7c; font-weight: 700; text-decoration: none; text-align: center; }
+.admin-entry:hover { background: #eaf3fb; }
+.admin-entry:focus-visible { outline: 3px solid #58a9ed; outline-offset: 3px; }
+.admin-entry-header { margin-top: 0; color: white; border-color: rgba(255,255,255,.4); font-size: .85rem; }
+.admin-entry-header:hover { background: rgba(255,255,255,.15); }

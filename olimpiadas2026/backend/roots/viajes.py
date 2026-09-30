@@ -2,7 +2,8 @@
 #       Creación del Router
 # ===============================
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from modulos.administradores import require_admin
 
 router = APIRouter()
 
@@ -25,7 +26,7 @@ from modulos.esquemas import Viaje_simple, Viaje_simple_id
 
 
 # ---- Crear viaje simple ----
-@router.post("/ingresar")
+@router.post("/ingresar", dependencies=[Depends(require_admin)])
 def ingresar_viaje_simple(data: Viaje_simple):
     """
     Registra un nuevo viaje simple en la base de datos.
@@ -44,7 +45,7 @@ def retornar_viaje_simple():
 
 
 # ---- Eliminar viaje simple ----
-@router.post("/eliminar")
+@router.post("/eliminar", dependencies=[Depends(require_admin)])
 def eliminar_viaje_simple(data: Viaje_simple_id):
     """
     Elimina un viaje simple de la base de datos usando su código.

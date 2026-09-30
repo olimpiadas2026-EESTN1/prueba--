@@ -2,7 +2,8 @@
 #         Creación del Router
 # ===============================
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from modulos.administradores import require_admin
 
 router = APIRouter()
 
@@ -37,7 +38,7 @@ from modulos.esquemas import (
 
 
 # ---- Crear nueva excursión ----
-@router.post("/ingresar")
+@router.post("/ingresar", dependencies=[Depends(require_admin)])
 def ingresar_excursiones(data: Excursiones):
     """
     Recibe datos de una excursión y la agrega a la base de datos.
@@ -47,7 +48,7 @@ def ingresar_excursiones(data: Excursiones):
 
 
 # ---- Crear nueva relacion paquete de viajes a excursion ----
-@router.post("/ingresarVinculoPV")
+@router.post("/ingresarVinculoPV", dependencies=[Depends(require_admin)])
 def ingresar_vinculo_PV(data: Vinculo_pv_a_exc):
     """
     Recibe las ids de un paquete de viajes y una excursion, y los relaciona.
@@ -87,7 +88,7 @@ def retornar_excursionesPorPV(data: Paquete_de_viaje_id):
 
 
 # ---- Eliminar excursión por ID ----
-@router.post("/eliminar")
+@router.post("/eliminar", dependencies=[Depends(require_admin)])
 def eliminar_excursiones(data: Excursiones_id):
     """
     Elimina una excursión dado su ID.

@@ -1,11 +1,20 @@
 // AuthContext.js
-import { createContext, useState } from "react";
+import { createContext, useState, useEffect } from "react";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [data, setData] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem("isLoggedIn") === "true");
+  const [isLoggedIn, setIsLoggedIn] = useState(() => Boolean(sessionStorage.getItem("buyer_token")));
+  useEffect(() => {
+    const expire = () => {
+      sessionStorage.removeItem('buyer_token');
+      localStorage.removeItem('isLoggedIn');
+      setIsLoggedIn(false);
+    };
+    window.addEventListener('buyer-session-expired', expire);
+    return () => window.removeEventListener('buyer-session-expired', expire);
+  }, []);
   const [listaCarrito, setListaCarrito] = useState(() => {
     const guardado = localStorage.getItem("carrito");
     return guardado ? JSON.parse(guardado) : [];

@@ -101,6 +101,9 @@ const Inside = ({ showHero = true }) => {
   // =========================================================
 
   const handleLogout = () => {
+    const token = sessionStorage.getItem('buyer_token');
+    if (token) fetch(`${API_URL}/clientes/cerrarSesion`, {method:'POST',headers:{Authorization:`Bearer ${token}`}}).catch(() => {});
+    sessionStorage.removeItem('buyer_token');
 
     setIsLoggedIn(false);
 
@@ -306,6 +309,7 @@ const Inside = ({ showHero = true }) => {
               unit_price:
                 precioProducto,
 
+              tipo: element.tipoProducto || (element.Transporte ? "viaje" : "paquete"),
               quantity: 1,
             };
           }
@@ -341,6 +345,7 @@ const Inside = ({ showHero = true }) => {
             method: "POST",
 
             headers: {
+              Authorization: `Bearer ${sessionStorage.getItem("buyer_token") || ""}`,
               "Content-Type":
                 "application/json",
             },

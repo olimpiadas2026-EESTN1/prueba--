@@ -15,3 +15,5 @@ If you are developing a production application, we recommend using TypeScript wi
 
 - [Pantallas enfocadas por categoría: alcance, implementación y pruebas](docs/pantallas-categorias.md)
 - [Instalación, conexión y datos de demostración](docs/desarrollo-local.md)
+- [Administración: acceso separado, hook, permisos y pruebas](docs/administracion.md)
+- [Gestión relacional: usuarios, pedidos, ventas y auditoría](docs/gestion-relacional.md)

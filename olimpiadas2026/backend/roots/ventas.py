@@ -2,7 +2,8 @@
 #         Creación del Router
 # ===============================
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from modulos.administradores import require_admin
 
 router = APIRouter()
 
@@ -39,7 +40,7 @@ from fastapi.responses import JSONResponse
 
 
 # ---- Crear nueva venta ----
-@router.post("/ingresar")
+@router.post("/ingresar", dependencies=[Depends(require_admin)])
 def ingresar_ventas(data: Venta_request):
     """
     Registra una nueva venta en la base de datos.
@@ -49,7 +50,7 @@ def ingresar_ventas(data: Venta_request):
 
 
 # ---- Obtener todas las ventas ----
-@router.get("/obtener")
+@router.get("/obtener", dependencies=[Depends(require_admin)])
 def retornar_ventas():
     """
     Devuelve la lista de todas las ventas registradas.
@@ -59,7 +60,7 @@ def retornar_ventas():
 
 
 # ---- Obtener todas las ventas relacionadas a una id ----
-@router.post("/obtenerID")
+@router.post("/obtenerID", dependencies=[Depends(require_admin)])
 def retornar_ventas(data: Venta_id):
     """
     Devuelve la lista de todas las ventas registradas por id.
@@ -69,7 +70,7 @@ def retornar_ventas(data: Venta_id):
 
 
 # ---- Obtener todas las ventas relacionadas a un usuario ----
-@router.post("/obtenerUsuario")
+@router.post("/obtenerUsuario", dependencies=[Depends(require_admin)])
 def retornar_ventas(data: Usuarios_comunes_id):
     """
     Devuelve la lista de todas las ventas registradas por usuario.
@@ -79,7 +80,7 @@ def retornar_ventas(data: Usuarios_comunes_id):
 
 
 # ---- Eliminar venta existente ----
-@router.post("/eliminarTVS")
+@router.post("/eliminarTVS", dependencies=[Depends(require_admin)])
 def eliminar_ventas(data: Venta_id):
     """
     Elimina una venta de la base de datos.
@@ -89,7 +90,7 @@ def eliminar_ventas(data: Venta_id):
 
 
 # ---- Confirmar mail para venta ----
-@router.post("/confirmarMail")
+@router.post("/confirmarMail", dependencies=[Depends(require_admin)])
 def confirmar_mail(data: Venta_request):
     """
     Elimina una venta de la base de datos.

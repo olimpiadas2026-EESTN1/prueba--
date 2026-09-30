@@ -3,7 +3,8 @@
 #         Creación del Router
 # ===============================
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from modulos.administradores import require_admin
 
 router = APIRouter()
 
@@ -45,7 +46,7 @@ from modulos.esquemas import (
 
 # ---- Crear nuevo auto ----
 
-@router.post("/ingresar")
+@router.post("/ingresar", dependencies=[Depends(require_admin)])
 async def ingresar_autos(data: Auto):
     """
     Recibe los datos de un auto y lo agrega a la base de datos.
@@ -57,7 +58,7 @@ async def ingresar_autos(data: Auto):
 
 # ---- Crear relación de viaje simple a auto ----
 
-@router.post("/ingresarVinculoVS")
+@router.post("/ingresarVinculoVS", dependencies=[Depends(require_admin)])
 async def ingresar_vinculos_VS(data: Vinculo_vs_a_auto):
     """
     Recibe los IDs de un viaje simple y un auto,
@@ -70,7 +71,7 @@ async def ingresar_vinculos_VS(data: Vinculo_vs_a_auto):
 
 # ---- Crear relación de paquete de viaje a auto ----
 
-@router.post("/ingresarVinculoPV")
+@router.post("/ingresarVinculoPV", dependencies=[Depends(require_admin)])
 async def ingresar_vinculos_PV(data: Vinculo_pv_a_auto):
     """
     Recibe los IDs de un paquete de viaje y un auto,
@@ -131,7 +132,7 @@ async def retornar_autosPorVS(data: Viaje_simple_id):
 
 # ---- Eliminar un auto por ID ----
 
-@router.post("/eliminar")
+@router.post("/eliminar", dependencies=[Depends(require_admin)])
 async def eliminar_autos(data: Auto_id):
     """
     Elimina un auto de la base de datos utilizando su ID.

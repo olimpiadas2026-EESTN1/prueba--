@@ -73,7 +73,6 @@ def verClientes():
                     "Usuario id": usuario[0],
                     "Nombre": usuario[1],
                     "Apellido": usuario[2],
-                    "Contraseña": usuario[3],
                     "Email": usuario[4],
                 }
             )
@@ -129,7 +128,6 @@ def verClienteId(data):
                 "Usuario id": respuesta[0][0],
                 "Nombre": respuesta[0][1],
                 "Apellido": respuesta[0][2],
-                "Contraseña": respuesta[0][3],
                 "Email": respuesta[0][4],
             }
         )
@@ -154,37 +152,6 @@ def validarCliente(data):
     cur = conn.cursor()
     try:
         cur.execute("SELECT contraseña, correo_electronico FROM usuario_comun")
-        res = cur.fetchall()
-        for i in res:
-            if data.usuarioIngresado == i[1]:
-                hash_guardado = i[0]
-                hash_guardado_bytes = hash_guardado.encode("utf-8")
-                validacion = verify_password(
-                    data.contraseñaIngresada, hash_guardado_bytes
-                )
-
-                return validacion
-
-        return "Correo electronico incorrecto"
-
-    except Exception as e:
-        conn.rollback()
-        return {"error": str(e)}
-
-    finally:
-        cur.close()
-        conn.close()
-
-
-# ---- Validar Admin ----
-def validarAdmin(data):
-    """
-    Valida un administrador al volver a ingresar a la pagina
-    """
-    conn = get_connection()
-    cur = conn.cursor()
-    try:
-        cur.execute("SELECT contraseña, correo_electronico FROM usuario_administrativo")
         res = cur.fetchall()
         for i in res:
             if data.usuarioIngresado == i[1]:

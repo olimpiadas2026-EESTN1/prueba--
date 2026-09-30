@@ -2,7 +2,8 @@
 #         Creación del Router
 # ===============================
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from modulos.administradores import require_admin
 
 router = APIRouter()
 
@@ -16,7 +17,6 @@ from modulos.usuarioComun import (
     verClienteId,
     eliminarUsuario,
     validarCliente,
-    validarAdmin,
 )
 
 # ===============================
@@ -46,7 +46,7 @@ async def ingresar_usuario(data: Usuarios_comunes):
 
 
 # ---- Obtener todos los usuarios comunes ----
-@router.get("/obtener")
+@router.get("/obtener", dependencies=[Depends(require_admin)])
 async def retornar_usuario():
     """
     Devuelve la lista de todos los usuarios comunes.
@@ -56,7 +56,7 @@ async def retornar_usuario():
 
 
 # ---- Eliminar usuario común por ID ----
-@router.post("/eliminar")
+@router.post("/eliminar", dependencies=[Depends(require_admin)])
 async def eliminar_usuario(data: Usuarios_comunes_id):
     """
     Elimina un usuario común dado su ID.
@@ -66,7 +66,7 @@ async def eliminar_usuario(data: Usuarios_comunes_id):
 
 
 # ---- Obtener usuario común por ID ----
-@router.post("/obtenerId")
+@router.post("/obtenerId", dependencies=[Depends(require_admin)])
 async def retornarPorID_usuario(data: Usuarios_comunes_id):
     """
     Devuelve los datos de un usuario común específico por ID.
@@ -83,11 +83,19 @@ async def retornarValidacion(data: Validacion_de_usuarios):
     res = validarCliente(data)
     return res
 
+from modulos import compras
+from fastapi import Header
 
-@router.post("/validarContrasenaAdmin")
-async def retornarValidacionAdmin(data: Validacion_de_usuarios):
-    """
-    Devuelve la validacion en formato booleano de si existe o no el administrador.
-    """
-    res = validarAdmin(data)
-    return res
+@router.post('/sesion')
+def buyer_login(data: Validacion_de_usuarios):
+    return compras.login(data.usuarioIngresado,data.contraseñaIngresada)
+
+@router.post('/cerrarSesion')
+def buyer_logout(authorization: str=Header(default=''), user_id=Depends(compras.require_buyer)):
+    compras._sessions.pop(authorization.removeprefix('Bearer '),None)
+    return {'ok':True}
+
+@router.get('/mis-pedidos')
+def my_orders(user_id=Depends(compras.require_buyer)):
+    from modulos.gestion import query
+    return query('SELECT id,creado_en,estado,total,items FROM pedidos WHERE uc_id=%s ORDER BY creado_en DESC LIMIT 200',(user_id,))

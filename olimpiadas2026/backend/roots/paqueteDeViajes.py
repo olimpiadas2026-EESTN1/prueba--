@@ -2,7 +2,8 @@
 #         Creación del Router
 # ===============================
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from modulos.administradores import require_admin
 
 router = APIRouter()
 
@@ -29,7 +30,7 @@ from modulos.esquemas import Paquete_de_viaje, Codigo_paquete_de_viaje
 
 
 # ---- Crear nuevo paquete de viaje ----
-@router.post("/ingresar")
+@router.post("/ingresar", dependencies=[Depends(require_admin)])
 def ingresar_paquetesDeViaje(data: Paquete_de_viaje):
     """
     Recibe datos para un nuevo paquete de viaje y lo agrega a la base de datos.
@@ -49,7 +50,7 @@ def retornar_paquetesDeViaje():
 
 
 # ---- Eliminar paquete de viaje por código ----
-@router.post("/eliminar")
+@router.post("/eliminar", dependencies=[Depends(require_admin)])
 def eliminar_paquetesDeViaje(data: Codigo_paquete_de_viaje):
     """
     Elimina un paquete de viaje dado su código identificador.

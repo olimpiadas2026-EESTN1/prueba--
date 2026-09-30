@@ -39,7 +39,7 @@ const {precio} =useContext(AuthContext)
   const handlerAgregar = () => {
     if (vueloSeleccionado) {
 
-        setListaCarrito(prev => [...prev, vueloSeleccionado]);
+        setListaCarrito(prev => [...prev, { ...vueloSeleccionado, tipoProducto: "viaje" }]);
       
       handleCerrarDiv();
     }

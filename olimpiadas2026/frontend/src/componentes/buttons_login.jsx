@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { AuthContext } from "../AuthContext"; 
-import { Outlet , Link} from "react-router-dom"
+import { Link} from "react-router-dom"
 const Login_buttons = () => {
   const { isLoggedIn } = useContext(AuthContext); 
 
@@ -12,6 +12,7 @@ const Login_buttons = () => {
           <Link className="link" to={"/sing-up"}>Regístrate</Link>
         </div>
       )}
+      <Link className="admin-entry admin-entry-header" to="/admin">Entrar como administrador</Link>
     </>
   );
 };
