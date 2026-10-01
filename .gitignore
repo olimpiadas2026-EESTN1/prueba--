@@ -10,3 +10,7 @@ env/
 .secrets/
 gmail-token*.json
 google-oauth-client*.json
+
+# Archivos generados por Python
+__pycache__/
+*.py[cod]
