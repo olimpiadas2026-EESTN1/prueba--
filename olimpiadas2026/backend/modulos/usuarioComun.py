@@ -4,12 +4,15 @@
 
 from main import get_connection
 
+
 # ===============================
-#     funciones auxiliares
+#     Funciones auxiliares
 # ===============================
 
 from controladores.hashing import hash_password, verify_password
-import bcrypt
+
+from correo import enviar_correo_registro
+
 
 # ===============================
 #             CRUD
@@ -17,42 +20,124 @@ import bcrypt
 
 
 # ---- Crear nuevo cliente ----
-def crearCliente(data):
+async def crearCliente(data):
     """
-    Inserta un nuevo cliente en la tabla usuario_comun.
+    Inserta un nuevo cliente en la tabla usuario_comun
+    y luego envía un correo de confirmación.
     """
+
     conn = get_connection()
     cur = conn.cursor()
-    try:
-        cur.execute("SELECT MAX(uc_id) FROM usuario_comun")
-        max_id = cur.fetchone()
-        if max_id[0] is None:
-            max_id = 1
-        else:
-            max_id = int(max_id[0]) + 1
 
-        contraseñaHasheada = hash_password(data.contraseña)
+    try:
+
+        # ===============================
+        # Obtener nuevo ID
+        # ===============================
+
         cur.execute(
-            "INSERT INTO usuario_comun (uc_id, nombre, apellido, contraseña, correo_electronico) VALUES(%s,%s,%s,%s,%s)",
+            "SELECT MAX(uc_id) FROM usuario_comun"
+        )
+
+        max_id = cur.fetchone()
+
+        if max_id[0] is None:
+            nuevo_id = 1
+        else:
+            nuevo_id = int(max_id[0]) + 1
+
+
+        # ===============================
+        # Hashear contraseña
+        # ===============================
+
+        contraseñaHasheada = hash_password(
+            data.contraseña
+        )
+
+
+        # ===============================
+        # Insertar usuario
+        # ===============================
+
+        cur.execute(
+            """
+            INSERT INTO usuario_comun
             (
-                max_id,
+                uc_id,
+                nombre,
+                apellido,
+                contraseña,
+                correo_electronico
+            )
+            VALUES
+            (
+                %s,
+                %s,
+                %s,
+                %s,
+                %s
+            )
+            """,
+            (
+                nuevo_id,
                 data.nombre,
                 data.apellido,
                 contraseñaHasheada,
                 data.correo_electronico,
             ),
         )
+
+
+        # ===============================
+        # Confirmar INSERT
+        # ===============================
+
         conn.commit()
 
-        return {"Mensaje": "Se ha cargado un nuevo cliente"}
 
     except Exception as e:
+
         conn.rollback()
-        return {"error": str(e)}
+
+        return {
+            "error": str(e)
+        }
+
 
     finally:
+
         cur.close()
         conn.close()
+
+
+    # ===============================
+    # Enviar correo
+    # ===============================
+
+    try:
+
+        await enviar_correo_registro(
+            email_usuario=data.correo_electronico,
+            nombre_usuario=data.nombre
+        )
+
+        return {
+            "Mensaje": "Se ha cargado un nuevo cliente y se envió el correo de confirmación"
+        }
+
+
+    except Exception as e:
+
+        print(
+            "ERROR ENVIANDO CORREO DE REGISTRO:",
+            e
+        )
+
+        return {
+            "Mensaje": "Se ha cargado un nuevo cliente",
+            "Advertencia": "El usuario fue creado, pero no se pudo enviar el correo de confirmación"
+        }
 
 
 # ---- Ver todos los clientes ----
@@ -60,14 +145,24 @@ def verClientes():
     """
     Recupera todos los clientes de la base de datos.
     """
+
     conn = get_connection()
     cur = conn.cursor()
+
     try:
-        cur.execute("SELECT * FROM usuario_comun WHERE eliminado_en IS NULL")
+
+        cur.execute(
+            "SELECT * FROM usuario_comun"
+        )
+
         respuesta = cur.fetchall()
+
         usuarios = []
+
         for usuario in respuesta:
+
             dicConvertido = []
+
             dicConvertido.append(
                 {
                     "Usuario id": usuario[0],
@@ -77,15 +172,24 @@ def verClientes():
                 }
             )
 
-            usuarios.append(dicConvertido)
+            usuarios.append(
+                dicConvertido
+            )
 
         return usuarios
 
+
     except Exception as e:
+
         conn.rollback()
-        return {"error": str(e)}
+
+        return {
+            "error": str(e)
+        }
+
 
     finally:
+
         cur.close()
         conn.close()
 
@@ -95,19 +199,38 @@ def eliminarUsuario(data):
     """
     Elimina un usuario de la tabla usuario_comun por su ID.
     """
+
     conn = get_connection()
     cur = conn.cursor()
+
     try:
-        cur.execute("DELETE FROM usuario_comun WHERE uc_Id = %s", (data.uc_id,))
+
+        cur.execute(
+            """
+            DELETE FROM usuario_comun
+            WHERE uc_id = %s
+            """,
+            (data.uc_id,)
+        )
+
         conn.commit()
 
-        return {"Mensaje": "Se ha eliminado un usuario correctamente"}
+        return {
+            "Mensaje": "Se ha eliminado un usuario correctamente"
+        }
+
 
     except Exception as e:
+
         conn.rollback()
-        return {"error": str(e)}
+
+        return {
+            "error": str(e)
+        }
+
 
     finally:
+
         cur.close()
         conn.close()
 
@@ -115,14 +238,28 @@ def eliminarUsuario(data):
 # ---- Ver cliente por ID ----
 def verClienteId(data):
     """
-    Busca un cliente por su ID y devuelve sus datos.
+    Busca un cliente por su ID
+    y devuelve sus datos.
     """
+
     conn = get_connection()
     cur = conn.cursor()
+
     try:
-        cur.execute("SELECT * FROM usuario_comun WHERE uc_id = %s AND eliminado_en IS NULL", (data.uc_id,))
+
+        cur.execute(
+            """
+            SELECT *
+            FROM usuario_comun
+            WHERE uc_id = %s
+            """,
+            (data.uc_id,)
+        )
+
         respuesta = cur.fetchall()
+
         dicConvertido = []
+
         dicConvertido.append(
             {
                 "Usuario id": respuesta[0][0],
@@ -134,11 +271,18 @@ def verClienteId(data):
 
         return dicConvertido
 
+
     except Exception as e:
+
         conn.rollback()
-        return {"error": str(e)}
+
+        return {
+            "error": str(e)
+        }
+
 
     finally:
+
         cur.close()
         conn.close()
 
@@ -146,29 +290,56 @@ def verClienteId(data):
 # ---- Validar cliente ----
 def validarCliente(data):
     """
-    Valida un cliente al volver a ingresar a la pagina
+    Valida un cliente al volver a ingresar a la página.
     """
+
     conn = get_connection()
     cur = conn.cursor()
+
     try:
-        cur.execute("SELECT contraseña, correo_electronico FROM usuario_comun WHERE eliminado_en IS NULL")
+
+        cur.execute(
+            """
+            SELECT
+                contraseña,
+                correo_electronico
+            FROM usuario_comun
+            """
+        )
+
         res = cur.fetchall()
+
         for i in res:
+
             if data.usuarioIngresado == i[1]:
+
                 hash_guardado = i[0]
-                hash_guardado_bytes = hash_guardado.encode("utf-8")
+
+                hash_guardado_bytes = (
+                    hash_guardado.encode("utf-8")
+                )
+
                 validacion = verify_password(
-                    data.contraseñaIngresada, hash_guardado_bytes
+                    data.contraseñaIngresada,
+                    hash_guardado_bytes
                 )
 
                 return validacion
 
+
         return "Correo electronico incorrecto"
 
+
     except Exception as e:
+
         conn.rollback()
-        return {"error": str(e)}
+
+        return {
+            "error": str(e)
+        }
+
 
     finally:
+
         cur.close()
         conn.close()
