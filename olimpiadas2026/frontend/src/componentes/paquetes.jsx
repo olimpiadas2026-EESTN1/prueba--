@@ -23,12 +23,10 @@ const Paquetes = () => {
   const{dataPaquetes,setDataPaquetes}= useContext(AuthContext)
   const [vueloSeleccionado, setVueloSeleccionado] = useState(null);
   const{ autos,setAutos}= useContext(AuthContext);
-  const {excursiones,setExcursiones} = useContext(AuthContext);
   const {eleccionMoneda, setEleccionMoneda} =useContext(AuthContext);
   const {precio,setPrecio} = useContext(AuthContext)
   const url = `${API_URL}/paqueteDeViajes/obtener`;
   const url_autos = `${API_URL}/autos/obtener`;
-  const url_exc =  `${API_URL}/excursiones/obtener`;
 
   const handleAbrirDiv = () => {
     document.body.style.overflow = "hidden";
@@ -51,22 +49,6 @@ const Paquetes = () => {
       handleCerrarDiv();
     }
   };
-   useEffect(() => {
-    const fetchData3 = async () => {
-      try {
-        const response = await apiFetch(url_exc);
-        if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-        const json = await response.json();
-        setExcursiones(json);
-        setLoading(false);
-      } catch (error) {
-        setErrorMessage(error.message);
-        setLoading(false);
-      }
-    };
-
-    fetchData3();
-  }, []);
  useEffect(() => {
     const fetchDataa = async () => {
       try {

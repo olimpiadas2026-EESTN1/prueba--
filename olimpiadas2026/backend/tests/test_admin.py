@@ -14,7 +14,7 @@ class AdminTests(unittest.TestCase):
     def test_protected_routes(self):
         for path in ['/ventas/obtener', '/clientes/obtener', '/admin/me']:
             self.assertEqual(self.client.get(path).status_code, 401)
-        for path in ['/viajes/ingresar', '/autos/eliminar', '/paqueteDeViajes/ingresar', '/excursiones/ingresar', '/ventas/ingresar']:
+        for path in ['/viajes/ingresar', '/autos/eliminar', '/paqueteDeViajes/ingresar', '/ventas/ingresar']:
             self.assertEqual(self.client.post(path, json={}).status_code, 401)
         self.assertEqual(self.client.get('/admin/me', headers={'Authorization': 'Bearer true'}).status_code,401)
 

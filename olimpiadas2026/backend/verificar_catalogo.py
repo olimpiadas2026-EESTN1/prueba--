@@ -9,7 +9,7 @@ from modulos.administradores import require_admin
 
 def verificar():
     client=TestClient(main.app)
-    paths=['/health','/viajes/obtener','/paqueteDeViajes/obtener','/autos/obtener','/excursiones/obtener']
+    paths=['/health','/viajes/obtener','/paqueteDeViajes/obtener','/autos/obtener']
     payloads={}
     def check(method,path,body=None,expected=200):
         r=client.request(method,path,json=body);d=r.json()
@@ -26,16 +26,14 @@ def verificar():
     for p in packages:
         if p['Nombre'].startswith('DEMO -'):
             assert check('POST','/autos/obtenerPV',{'pv_id':p['Codigo']}),'Paquete demo sin auto'
-            assert check('POST','/excursiones/obtenerPV',{'pv_id':p['Codigo']}),'Paquete demo sin excursión'
     check('POST','/autos/obtenerID',{'auto_id':2147483647},404)
-    check('POST','/excursiones/obtenerID',{'excursion_id':2147483647},404)
     for path in ['/admin/pedidos','/admin/usuarios','/admin/ventas']:
         check('GET',path,expected=401)
     main.app.dependency_overrides[require_admin]=lambda:{'id':0}
     try:
         for path in ['/admin/resumen','/admin/usuarios','/admin/pedidos','/admin/ventas','/admin/auditoria','/admin/entregados','/admin/pendientes-entrega','/admin/cuenta-corriente?orden=fecha','/admin/cuenta-corriente?orden=cliente','/admin/solicitudes']:
             check('GET',path)
-        for kind in ['viajes','paquetes','autos','excursiones']:
+        for kind in ['viajes','paquetes','autos']:
             check('GET',f'/admin/catalogo/{kind}')
             check('GET',f'/admin/catalogo/{kind}?eliminados=true')
     finally:main.app.dependency_overrides.pop(require_admin,None)

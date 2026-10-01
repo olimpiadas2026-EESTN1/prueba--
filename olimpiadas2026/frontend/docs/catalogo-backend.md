@@ -7,9 +7,8 @@ La revisión del 01/10 se concentra en catálogo y consultas administrativas. La
 - Viajes: 7 (3 vuelos y 4 micros).
 - Paquetes: 4.
 - Autos: 6, incluyendo SUV en Bariloche, sedán en Mendoza, compacto en Iguazú y familiar en Mar del Plata.
-- Excursiones: 4, incluyendo Circuito Chico, bodegas y cataratas.
 
-Los nuevos productos llevan `DEMO` y precios ficticios. No constituyen reservas reales. Los paquetes DEMO de Bariloche, Mendoza e Iguazú tienen auto y excursión relacionados. Los viajes DEMO con destino en estas ciudades y Mar del Plata tienen auto relacionado. Un viaje puede no tener auto asociado; en ese caso la API devuelve una lista vacía, no un error.
+Los nuevos productos llevan `DEMO` y precios ficticios. No constituyen reservas reales. Los paquetes DEMO de Bariloche, Mendoza e Iguazú tienen autos relacionados. Los viajes DEMO con destino en estas ciudades y Mar del Plata también tienen autos relacionados. Un viaje puede no tener auto asociado; en ese caso la API devuelve una lista vacía, no un error.
 
 ## Carga reproducible
 
@@ -23,8 +22,8 @@ El script agrega ejemplos faltantes por nombre, en una transacción, sin sobresc
 
 ## Correcciones
 
-- Consultar un auto o excursión inexistente devuelve 404.
-- Consultas de relaciones usan una consulta SQL con joins en vez de abrir otra conexión por cada resultado. Se mantienen los formatos que espera el frontend, incluidas las listas anidadas de excursiones.
+- Consultar un auto inexistente devuelve 404.
+- Las consultas de relaciones usan una consulta SQL con joins en vez de abrir otra conexión por cada resultado.
 - Vínculos validan que ambos productos estén activos y no duplican asociaciones.
 - Identificadores de relaciones no dependen de secuencias antiguas desincronizadas.
 - Altas de catálogo con MAX+1 se serializan para evitar que dos administradores generen el mismo ID.

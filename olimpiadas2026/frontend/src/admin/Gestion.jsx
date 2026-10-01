@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAdmin } from './useAdmin';
-const entities = [['resumen','Resumen'],['usuarios','Usuarios'],['pedidos','Pedidos'],['ventas','Ventas'],['viajes','Vuelos y micros'],['paquetes','Paquetes'],['autos','Autos'],['excursiones','Excursiones'],['auditoria','Cambios'],['correos','Correos de compra']];
-const fields = {usuarios:['nombre','apellido','correo_electronico'], viajes:['nombre','descripcion','precio','cupos','estado'], paquetes:['nombre','descripcion','precio','cupos','estado'], autos:['modelo','disponibles','precio_por_dia'], excursiones:['nombre','descripcion','lugar']};
-const keys = {usuarios:'id',pedidos:'id',ventas:'id',viajes:'codigo',paquetes:'codigo',autos:'auto_id',excursiones:'excursion_id'};
+const entities = [['resumen','Resumen'],['usuarios','Usuarios'],['pedidos','Pedidos'],['ventas','Ventas'],['viajes','Vuelos y micros'],['paquetes','Paquetes'],['autos','Autos'],['auditoria','Cambios'],['correos','Correos de compra']];
+const fields = {usuarios:['nombre','apellido','correo_electronico'], viajes:['nombre','descripcion','precio','cupos','estado'], paquetes:['nombre','descripcion','precio','cupos','estado'], autos:['modelo','disponibles','precio_por_dia']};
+const keys = {usuarios:'id',pedidos:'id',ventas:'id',viajes:'codigo',paquetes:'codigo',autos:'auto_id'};
 function Cell({ value }) { return typeof value === 'object' && value !== null ? <details><summary>Ver detalle</summary><pre>{JSON.stringify(value,null,2)}</pre></details> : String(value ?? '—'); }
 function Table({ rows, onUser, onEdit, onDelete, busy }) {
  if (!rows.length) return <p>No hay registros.</p>;

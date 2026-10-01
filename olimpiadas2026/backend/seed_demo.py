@@ -9,7 +9,7 @@ def seed():
     added = 0
     with get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute('LOCK TABLE viaje_simple, paquete_de_viajes, auto, excursiones, vs_at, exc_at, pv_exc IN SHARE ROW EXCLUSIVE MODE')
+            cur.execute('LOCK TABLE viaje_simple, paquete_de_viajes, auto, vs_at, exc_at IN SHARE ROW EXCLUSIVE MODE')
             trips = [
                 ('Bariloche', 'Avion', 185000, '2 h 20 min'),
                 ('Mendoza', 'Avion', 125000, '1 h 50 min'),
@@ -60,16 +60,6 @@ def seed():
                 cur.execute("SELECT codigo FROM paquete_de_viajes WHERE destino=%s AND eliminado_en IS NULL AND nombre LIKE 'DEMO -%%'",(dest,))
                 for (package_id,) in cur.fetchall():
                     cur.execute('INSERT INTO exc_at(id,pv_id,at_id) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM exc_at),%s,%s WHERE NOT EXISTS(SELECT 1 FROM exc_at WHERE pv_id=%s AND at_id=%s)',(package_id,auto_id,package_id,auto_id))
-            for dest,title in [('Bariloche','Circuito Chico'),('Mendoza','Visita a bodegas'),('Iguazú','Paseo por cataratas')]:
-                name=f'DEMO - {title}'
-                cur.execute('SELECT excursion_id FROM excursiones WHERE nombre=%s',(name,)); row=cur.fetchone()
-                if row: excursion_id=row[0]
-                else:
-                    cur.execute('SELECT COALESCE(MAX(excursion_id),0)+1 FROM excursiones'); excursion_id=cur.fetchone()[0]
-                    cur.execute('INSERT INTO excursiones(excursion_id,nombre,inicio,final,descripcion,lugar) VALUES(%s,%s,%s,%s,%s,%s)',(excursion_id,name,time(9),time(13),'Actividad ficticia para demostración; no es una reserva real.',dest)); added+=1
-                cur.execute("SELECT codigo FROM paquete_de_viajes WHERE destino=%s AND eliminado_en IS NULL AND nombre LIKE 'DEMO -%%'",(dest,))
-                for (package_id,) in cur.fetchall():
-                    cur.execute('INSERT INTO pv_exc(id,pv_id,exc_id) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM pv_exc),%s,%s WHERE NOT EXISTS(SELECT 1 FROM pv_exc WHERE pv_id=%s AND exc_id=%s)',(package_id,excursion_id,package_id,excursion_id))
     print(f'Registros de demostración agregados: {added}')
 
 

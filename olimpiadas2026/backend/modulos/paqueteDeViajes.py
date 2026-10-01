@@ -137,17 +137,6 @@ def quitarPaquetedeViaje(codigoDeViaje):
     conn = get_connection()
     cur = conn.cursor()
     try:
-        cur.execute("SELECT * FROM pv_exc WHERE pv_id = %s", (codigoDeViaje,))
-        n = cur.fetchall()
-        regPvExcIDs = []
-        for i in n:
-
-            regPvExcIDs.append(i[2])
-
-        for id in regPvExcIDs:
-            cur.execute("DELETE FROM pv_exc WHERE id = %s", (id,))
-            conn.commit()
-
         cur.execute("SELECT id FROM exc_at WHERE pv_id = %s", (codigoDeViaje,))
         r = cur.fetchall()
         regPvAtIdDs = []

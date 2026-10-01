@@ -11,7 +11,6 @@ ENTIDADES = {
     'viajes': ('viaje_simple', 'codigo'),
     'paquetes': ('paquete_de_viajes', 'codigo'),
     'autos': ('auto', 'auto_id'),
-    'excursiones': ('excursiones', 'excursion_id'),
     'pedidos': ('pedidos', 'id'),
     'ventas': ('ventas', 'vtas_id'),
 }

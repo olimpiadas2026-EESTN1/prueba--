@@ -57,9 +57,6 @@ const Inside = ({ showHero = true }) => {
   const { autos, setAutos } =
     useContext(AuthContext);
 
-  const { excursiones, setExcursiones } =
-    useContext(AuthContext);
-
 
   const { eleccionMoneda, setEleccionMoneda } =
     useContext(AuthContext);

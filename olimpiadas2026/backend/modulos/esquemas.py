@@ -151,35 +151,6 @@ class Vinculo_pv_a_auto(BaseModel):
     at_id: int = Field(gt=0)
 
 
-class Excursiones(BaseModel):
-    """
-    Modelo Pydantic para representar una excursión.
-    """
-
-    nombre: str = Field(min_length=1,max_length=2000)
-    inicio: str  # Hora de inicio (se recomienda formato 'HH:MM')
-    final: str  # Hora de finalización (se recomienda formato 'HH:MM')
-    descripcion: str = Field(min_length=1,max_length=2000)
-    lugar: str = Field(min_length=1,max_length=2000)
-
-
-class Excursiones_id(BaseModel):
-    """
-    Modelo Pydantic para representar la ID de una Excursion.
-    """
-
-    excursion_id: int = Field(gt=0)
-
-
-class Vinculo_pv_a_exc(BaseModel):
-    """
-    Modelo Pydantic para representar el vinculo de un paquete de viaje a una excursion.
-    """
-
-    pv_id: int = Field(gt=0)
-    exc_id: int = Field(gt=0)
-
-
 class Validacion_de_usuarios(BaseModel):
     """
     Modelo Pydantic para representar logins.

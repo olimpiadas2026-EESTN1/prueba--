@@ -27,7 +27,7 @@ No se presentan pedidos pendientes como ventas. Los pedidos anteriores a esta im
 - Búsqueda de usuarios por nombre/correo y ficha con sus pedidos y ventas.
 - Historial de pedidos con desglose de productos, estado y preferencia de pago.
 - Historial de ventas con comprador y producto relacionados; ventas sin vínculo existente se muestran sin inventar un titular.
-- Consulta y edición de viajes, paquetes, autos y excursiones.
+- Consulta y edición de viajes, paquetes y autos.
 - Edición de nombre, apellido y correo del comprador, conservando su ID y relaciones.
 - Registro de cambios; nunca se devuelven hashes ni contraseñas de compradores.
 
@@ -42,7 +42,7 @@ Todos estos endpoints requieren token administrativo:
 - `GET /admin/usuarios/{id}` devuelve `usuario`, `pedidos`, `ventas`.
 - `GET /admin/pedidos?usuario_id=...`
 - `GET /admin/ventas?usuario_id=...`
-- `GET /admin/catalogo/{viajes|paquetes|autos|excursiones}`
+- `GET /admin/catalogo/{viajes|paquetes|autos}`
 - `PATCH /admin/datos/{entidad}/{id}` recibe campos permitidos, valida y audita en una misma transacción.
 - `GET /admin/auditoria`
 

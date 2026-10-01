@@ -1,6 +1,5 @@
 import psycopg
 import datetime #Para convertir variables a tipo date para postgre
-from crudExcursiones import paqueteViajesExcursion
 from datetime import datetime
 import os
 
@@ -200,20 +199,7 @@ print(quitarViajesimple(676713853))
 def quitarPaquetedeViaje(codigoDeViaje):
 
 
-    #Busco las relaciones que existen entre paquete-excursiones para borrarlas
-    cursor.execute("SELECT * FROM pv_exc WHERE pv_id = %s", (codigoDeViaje,))
-    n = cursor.fetchall()
-    regPvExcIDs = [] #Guardo los id de las relaciones aca.
-    for i in n:
-        
-        regPvExcIDs.append(i[2])
-
-    for id in regPvExcIDs:
-        cursor.execute("DELETE FROM pv_exc WHERE id = %s", (id,))
-        conexionViajes.commit()
-
-
-    #Lo mismo para las relaciones auto-excursion
+    #Borra primero las relaciones entre el paquete y los autos.
     cursor.execute("SELECT id FROM exc_at WHERE pv_id = %s", (codigoDeViaje,))
     r = cursor.fetchall()
     regPvAtIdDs = []
@@ -267,7 +253,6 @@ def consultarCuposTPV(codigoViaje):
     else:
         cursor.execute("UPDATE paquete_de_viajes SET estado = %s WHERE codigo = %s",("disponible", codigoViaje))
         return {"Mensaje":"Sigue con cupos disponibles."}
-
 
 
 

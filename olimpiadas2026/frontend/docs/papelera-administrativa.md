@@ -1,6 +1,6 @@
 # Eliminación y restauración administrativa
 
-En Usuarios, Pedidos, Ventas, Vuelos y micros, Paquetes, Autos y Excursiones, cada fila tiene **Eliminar**. El formulario muestra el registro, explica el efecto y solicita un motivo. Confirmar envía el registro a la papelera. Activar **Ver papelera** permite consultar los eliminados y **Restaurar** los devuelve a la lista activa. Ambas acciones requieren sesión administrativa, confirmación y un motivo de hasta 500 caracteres.
+En Usuarios, Pedidos, Ventas, Vuelos y micros, Paquetes y Autos, cada fila tiene **Eliminar**. El formulario muestra el registro, explica el efecto y solicita un motivo. Confirmar envía el registro a la papelera. Activar **Ver papelera** permite consultar los eliminados y **Restaurar** los devuelve a la lista activa. Ambas acciones requieren sesión administrativa, confirmación y un motivo de hasta 500 caracteres.
 
 Es una baja lógica (`eliminado_en`), no un borrado definitivo de la base. Las relaciones entre usuarios, pedidos, ventas y productos permanecen intactas. No hay eliminación en cascada. Auditoría y comprobantes se conservan; no tienen botón de borrado. La cuenta administrativa que ejecuta la operación tampoco forma parte de Usuarios, que lista compradores.
 
@@ -20,7 +20,7 @@ Cada acción guarda administrador, entidad, identificador, acción y motivo en C
 - `DELETE /admin/datos/{entidad}/{id}` con `{"motivo":"..."}`.
 - `POST /admin/datos/{entidad}/{id}/restaurar` con el mismo cuerpo.
 - Las listas administrativas admiten `?eliminados=true` (solo papelera); por defecto muestran solo activos.
-- Entidades admitidas: `usuarios`, `pedidos`, `ventas`, `viajes`, `paquetes`, `autos`, `excursiones`. Pedidos usa UUID; las demás, un entero positivo.
+- Entidades admitidas: `usuarios`, `pedidos`, `ventas`, `viajes`, `paquetes` y `autos`. Pedidos usa UUID; las demás, un entero positivo.
 - Los endpoints antiguos `/eliminar` y `/ventas/eliminarTVS` delegan en la misma baja lógica con un motivo de compatibilidad; dejan de hacer borrados físicos.
 - Aplicar `backend/migrations/005_papelera.sql` después de las migraciones anteriores, antes de iniciar esta versión. Añade `eliminado_en` y convierte `admin_auditoria.registro_id` a texto para admitir UUID. No elimina registros ni cambia estados de pago.
 

@@ -3,7 +3,6 @@ ALTER TABLE usuario_comun ADD COLUMN IF NOT EXISTS eliminado_en timestamptz;
 ALTER TABLE viaje_simple ADD COLUMN IF NOT EXISTS eliminado_en timestamptz;
 ALTER TABLE paquete_de_viajes ADD COLUMN IF NOT EXISTS eliminado_en timestamptz;
 ALTER TABLE auto ADD COLUMN IF NOT EXISTS eliminado_en timestamptz;
-ALTER TABLE excursiones ADD COLUMN IF NOT EXISTS eliminado_en timestamptz;
 ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS eliminado_en timestamptz;
 ALTER TABLE ventas ADD COLUMN IF NOT EXISTS eliminado_en timestamptz;
 ALTER TABLE admin_auditoria ALTER COLUMN registro_id TYPE text USING registro_id::text;

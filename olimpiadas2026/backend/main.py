@@ -137,10 +137,6 @@ from roots.clientes import (
     router as clientes_routers
 )
 
-from roots.excursiones import (
-    router as excursiones_routers
-)
-
 from roots.paqueteDeViajes import (
     router as paqueteDeViajes_routers
 )
@@ -170,11 +166,6 @@ app.include_router(
 app.include_router(
     clientes_routers,
     prefix="/clientes"
-)
-
-app.include_router(
-    excursiones_routers,
-    prefix="/excursiones"
 )
 
 app.include_router(

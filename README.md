@@ -9,7 +9,7 @@ El panel administrativo incluye:
 - Resumen de usuarios, pedidos y ventas registradas.
 - Búsqueda y edición de usuarios, con ficha e historiales relacionados.
 - Historial de pedidos y ventas vinculados a cada comprador.
-- Consulta y edición de viajes, paquetes, autos y excursiones; alta de viajes y paquetes.
+- Consulta y edición de viajes, paquetes y autos; alta de viajes y paquetes.
 - Auditoría de cambios y operaciones protegidas por sesión administrativa.
 
 ### Preparación para el equipo

@@ -4,7 +4,7 @@
 
 El carrito ahora registra primero un pedido sin abrir Mercado Pago y conduce a Mis pedidos. Desde allí el comprador revisa cantidades, quita artículos usando cantidad cero, anula con un motivo o inicia el pago. El backend recalcula precios y disponibilidad; no acepta precios del navegador. La modificación requiere la versión observada del pedido para evitar sobrescrituras desde otra pestaña.
 
-La lista `/productos` presenta código, descripción, precio y cupos sin imágenes y permite agregar al carrito. `/ayuda` contiene ayuda al comprador y manual del jefe de ventas. Los formularios del catálogo administrativo permiten crear viajes, paquetes, autos y excursiones. El checkout sigue admitiendo viajes y paquetes: autos y excursiones se administran como componentes y no se compran individualmente en este flujo.
+La lista `/productos` presenta código, descripción, precio y cupos sin imágenes y permite agregar al carrito. `/ayuda` contiene ayuda al comprador y manual del jefe de ventas. Los formularios del catálogo administrativo permiten crear viajes, paquetes y autos. El checkout sigue admitiendo viajes y paquetes; los autos se administran como componentes y no se compran individualmente en este flujo.
 
 Una vez iniciado el pago, la modificación y la anulación directa se bloquean, incluso si el proveedor da un error incierto. El comprador puede enviar una solicitud a ventas. La respuesta queda vinculada a su cuenta y pedido. Resolver una solicitud NO ejecuta cambios de artículos, reembolsos o anulaciones del checkout. El procedimiento automatizado para cambiar o anular compras que ya iniciaron el pago sigue pendiente; esta limitación debe explicarse en la entrega y contrastarse con el relevamiento.
 

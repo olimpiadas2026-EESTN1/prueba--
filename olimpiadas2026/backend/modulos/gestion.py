@@ -58,7 +58,7 @@ def summary():
 
 
 CATALOGS={'viajes':('viaje_simple','codigo'), 'paquetes':('paquete_de_viajes','codigo'),
-          'autos':('auto','auto_id'), 'excursiones':('excursiones','excursion_id')}
+          'autos':('auto','auto_id')}
 
 
 def catalog(kind, eliminados=False):
@@ -73,7 +73,6 @@ def update(kind, key, changes, admin):
         'viajes':('viaje_simple','codigo',{'nombre','descripcion','precio','cupos','estado'}),
         'paquetes':('paquete_de_viajes','codigo',{'nombre','descripcion','precio','cupos','estado'}),
         'autos':('auto','auto_id',{'modelo','disponibles','precio_por_dia'}),
-        'excursiones':('excursiones','excursion_id',{'nombre','descripcion','lugar'}),
     }
     if kind not in allowed: raise HTTPException(404,'Entidad inexistente')
     table,pk,fields=allowed[kind]

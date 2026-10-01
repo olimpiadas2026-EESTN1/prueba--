@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { AdminProvider, useAdmin } from './useAdmin';
 
 const common = ['nombre', 'descripcion', 'precio', 'origen', 'destino', 'fecha', 'hora', 'cupos', 'tipo_de_viaje'];
-const extra = { viajes: ['transporte', 'duracion_aprox'], paqueteDeViajes: ['estadia', 'tipo', 'duracion'], autos:['modelo','disponibles','precio_por_dia'], excursiones:['nombre','inicio','final','descripcion','lugar'] };
+const extra = { viajes: ['transporte', 'duracion_aprox'], paqueteDeViajes: ['estadia', 'tipo', 'duracion'], autos:['modelo','disponibles','precio_por_dia'] };
 
 function Panel() {
   const { admin, login, logout, request } = useAdmin();
@@ -49,10 +49,10 @@ function Panel() {
       <Gestion revision={revision} />
       <h2>Alta de catálogo</h2>
       <nav className="admin-tabs" aria-label="Crear productos">
-        {[['viajes','Nuevo vuelo o micro'],['paqueteDeViajes','Nuevo paquete'],['autos','Nuevo auto'],['excursiones','Nueva excursión']].map(([key,label])=><button key={key} aria-pressed={section===key} onClick={()=>setSection(key)}>{label}</button>)}
+        {[['viajes','Nuevo vuelo o micro'],['paqueteDeViajes','Nuevo paquete'],['autos','Nuevo auto']].map(([key,label])=><button key={key} aria-pressed={section===key} onClick={()=>setSection(key)}>{label}</button>)}
       </nav>
       {extra[section] && <form key={section} onSubmit={create} className="admin-form">
-        <h2>Crear {section === 'viajes' ? 'viaje' : section==='paqueteDeViajes'?'paquete':section==='autos'?'auto':'excursión'}</h2>
+        <h2>Crear {section === 'viajes' ? 'viaje' : section==='paqueteDeViajes'?'paquete':'auto'}</h2>
         {[...(['viajes','paqueteDeViajes'].includes(section)?common:[]), ...extra[section]].map(field => <label key={field}>{field.replaceAll('_', ' ')}
           {field === 'transporte' ? <select name={field}><option>Avion</option><option>Micro</option></select> : <input name={field} required type={['precio','cupos','disponibles','precio_por_dia'].includes(field) ? 'number' : field === 'fecha' ? 'date' : ['hora','inicio','final'].includes(field) ? 'time' : 'text'} min={['precio','cupos','disponibles','precio_por_dia'].includes(field) ? 1 : undefined} step={field.includes('precio') ? '0.01' : undefined} />}
         </label>)}

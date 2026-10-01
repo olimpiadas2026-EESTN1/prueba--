@@ -5,7 +5,6 @@ from modulos.gestion import connection
 RELACIONES={
  'vs_at':('viaje_simple','codigo','vs_id','auto','auto_id','at_id'),
  'exc_at':('paquete_de_viajes','codigo','pv_id','auto','auto_id','at_id'),
- 'pv_exc':('paquete_de_viajes','codigo','pv_id','excursiones','excursion_id','exc_id'),
 }
 def vincular(tabla,origen,destino):
     if tabla not in RELACIONES: raise HTTPException(404,'Relación inexistente')

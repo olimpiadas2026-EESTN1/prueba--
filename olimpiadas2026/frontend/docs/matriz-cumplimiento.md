@@ -11,7 +11,7 @@ Implementado significa código disponible, no aprobación de la evaluación. Ver
 | 1.3.2 | Carrito | Implementado | Categorías y lista agregan artículos. Registro conduce a Mis pedidos. |
 | 1.3.3 | Pedido pendiente de entrega | Implementado | Pedido creado antes del pago; listas separadas de pendientes/entregados/anulados. |
 | 1.3.4 | Consultar, modificar y eliminar pendientes | Parcial | Edición de cantidades y anulación antes del checkout. Después hay solicitudes; cambios/reembolsos tras iniciar pago no automatizados. |
-| 1.4.1–2 | Alta y consulta de productos | Implementado | Altas de viajes, paquetes, autos y excursiones; código generado en backend. Autos/excursiones como componentes, no compra independiente. |
+| 1.4.1–2 | Alta y consulta de productos | Implementado | Altas de viajes, paquetes y autos; código generado en backend. Autos como componentes, no compra independiente. |
 | 1.4.3 | Estado de pedidos pendientes | Implementado | Panel con pago y gestión separados; lista Pendientes de entrega. |
 | 1.4.4 | Entrega | Implementado | Operación transaccional, requiere pago confirmado y estado listo; histórico persistido. |
 | 1.4.5 | Facturas a cobrar por fecha y cliente | Parcial | Comprobantes internos y saldos con ambos órdenes. Sin facturación fiscal ni pagos parciales. Confirmar esta interpretación con docente/relevamiento. |
