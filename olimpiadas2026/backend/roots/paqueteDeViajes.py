@@ -51,9 +51,10 @@ def retornar_paquetesDeViaje():
 
 # ---- Eliminar paquete de viaje por código ----
 @router.post("/eliminar", dependencies=[Depends(require_admin)])
-def eliminar_paquetesDeViaje(data: Codigo_paquete_de_viaje):
+def eliminar_paquetesDeViaje(data: Codigo_paquete_de_viaje, admin=Depends(require_admin)):
     """
     Elimina un paquete de viaje dado su código identificador.
     """
-    res = quitarPaquetedeViaje(data.codigoDeViaje)
+    from modulos.papelera import cambiar
+    res = cambiar("paquetes", data.codigoDeViaje, "Baja desde endpoint compatible", admin)
     return res

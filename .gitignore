@@ -5,3 +5,8 @@
 .env
 env/
 .venv/
+
+# Autorización local Gmail API
+.secrets/
+gmail-token*.json
+google-oauth-client*.json

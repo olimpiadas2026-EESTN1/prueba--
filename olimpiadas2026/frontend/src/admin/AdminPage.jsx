@@ -1,10 +1,11 @@
+import CircuitoComercial from "./CircuitoComercial";
 import Gestion from "./Gestion";
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AdminProvider, useAdmin } from './useAdmin';
 
 const common = ['nombre', 'descripcion', 'precio', 'origen', 'destino', 'fecha', 'hora', 'cupos', 'tipo_de_viaje'];
-const extra = { viajes: ['transporte', 'duracion_aprox'], paqueteDeViajes: ['estadia', 'tipo', 'duracion'] };
+const extra = { viajes: ['transporte', 'duracion_aprox'], paqueteDeViajes: ['estadia', 'tipo', 'duracion'], autos:['modelo','disponibles','precio_por_dia'], excursiones:['nombre','inicio','final','descripcion','lugar'] };
 
 function Panel() {
   const { admin, login, logout, request } = useAdmin();
@@ -22,9 +23,8 @@ function Panel() {
   async function create(event) {
     event.preventDefault(); const form = event.currentTarget;
     const data = Object.fromEntries(new FormData(form));
-    data.precio = Number(data.precio); data.cupos = Number(data.cupos);
-    const [year, month, day] = data.fecha.split('-');
-    data.fecha = `${day}/${month}/${year.slice(-2)}`;
+    for(const field of ['precio','cupos','disponibles','precio_por_dia'])if(field in data)data[field]=Number(data[field]);
+    if(data.fecha){const [year,month,day]=data.fecha.split('-');data.fecha=`${day}/${month}/${year.slice(-2)}`;}
     setBusy(true); setMessage('');
     try {
       await request(`/${section}/ingresar`, { method: 'POST', body: JSON.stringify(data) });
@@ -45,15 +45,16 @@ function Panel() {
     </form> : <>
       <p>Sesión de {admin.nombre}</p>
       <button onClick={() => logout().catch(() => setMessage('Sesión cerrada localmente. No se pudo contactar al servidor.'))}>Cerrar sesión administrativa</button>
+      <CircuitoComercial />
       <Gestion revision={revision} />
       <h2>Alta de catálogo</h2>
       <nav className="admin-tabs" aria-label="Crear productos">
-        {[['viajes','Nuevo vuelo o micro'],['paqueteDeViajes','Nuevo paquete']].map(([key,label])=><button key={key} aria-pressed={section===key} onClick={()=>setSection(key)}>{label}</button>)}
+        {[['viajes','Nuevo vuelo o micro'],['paqueteDeViajes','Nuevo paquete'],['autos','Nuevo auto'],['excursiones','Nueva excursión']].map(([key,label])=><button key={key} aria-pressed={section===key} onClick={()=>setSection(key)}>{label}</button>)}
       </nav>
       {extra[section] && <form key={section} onSubmit={create} className="admin-form">
-        <h2>Crear {section === 'viajes' ? 'viaje' : 'paquete'}</h2>
-        {[...common, ...extra[section]].map(field => <label key={field}>{field.replaceAll('_', ' ')}
-          {field === 'transporte' ? <select name={field}><option>Avion</option><option>Micro</option></select> : <input name={field} required type={['precio','cupos'].includes(field) ? 'number' : field === 'fecha' ? 'date' : field === 'hora' ? 'time' : 'text'} min={['precio','cupos'].includes(field) ? 1 : undefined} step={field === 'precio' ? '0.01' : undefined} />}
+        <h2>Crear {section === 'viajes' ? 'viaje' : section==='paqueteDeViajes'?'paquete':section==='autos'?'auto':'excursión'}</h2>
+        {[...(['viajes','paqueteDeViajes'].includes(section)?common:[]), ...extra[section]].map(field => <label key={field}>{field.replaceAll('_', ' ')}
+          {field === 'transporte' ? <select name={field}><option>Avion</option><option>Micro</option></select> : <input name={field} required type={['precio','cupos','disponibles','precio_por_dia'].includes(field) ? 'number' : field === 'fecha' ? 'date' : ['hora','inicio','final'].includes(field) ? 'time' : 'text'} min={['precio','cupos','disponibles','precio_por_dia'].includes(field) ? 1 : undefined} step={field.includes('precio') ? '0.01' : undefined} />}
         </label>)}
         <button disabled={busy}>{busy ? 'Guardando…' : 'Guardar'}</button>
       </form>}

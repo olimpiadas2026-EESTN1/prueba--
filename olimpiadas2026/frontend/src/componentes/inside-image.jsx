@@ -24,8 +24,6 @@ const Inside = ({ showHero = true }) => {
   const [mostrarCarrito, setMostrarCarrito] =
     useState(false);
 
-  const [tieneCuotas, setTieneCoutas] =
-    useState(false);
 
   const { isLoggedIn, setIsLoggedIn } =
     useContext(AuthContext);
@@ -45,8 +43,6 @@ const Inside = ({ showHero = true }) => {
   const [animandoCierre, setAnimandoCierre] =
     useState(false);
 
-  const [metodoPago, setMetodoPago] =
-    useState(null);
 
   const { autos, setAutos } =
     useContext(AuthContext);
@@ -54,8 +50,6 @@ const Inside = ({ showHero = true }) => {
   const { excursiones, setExcursiones } =
     useContext(AuthContext);
 
-  const [cuotas, setCuotas] =
-    useState(3);
 
   const { eleccionMoneda, setEleccionMoneda } =
     useContext(AuthContext);
@@ -190,366 +184,19 @@ const Inside = ({ showHero = true }) => {
   // MERCADO PAGO
   // =========================================================
 
+  const [guardandoPedido,setGuardandoPedido]=useState(false);
   const handleEnviarVenta = async (event) => {
-
     event.preventDefault();
-
-    console.log("====================================");
-    console.log("INICIANDO PAGO");
-    console.log("====================================");
-
-
-    // ---------------------------------------------------------
-    // VERIFICAR CARRITO
-    // ---------------------------------------------------------
-
-    if (
-      !listaCarrito ||
-      listaCarrito.length === 0
-    ) {
-
-      alert(
-        "Tu carrito está vacío."
-      );
-
-      return;
-    }
-
-
-    // ---------------------------------------------------------
-    // VERIFICAR LOGIN
-    // ---------------------------------------------------------
-
-    if (!mail_guardado) {
-
-      alert(
-        "Necesitás iniciar sesión antes de continuar con el pago."
-      );
-
-      return;
-    }
-
-
-    // ---------------------------------------------------------
-    // VERIFICAR MÉTODO DE PAGO
-    // ---------------------------------------------------------
-
-    if (!metodoPago) {
-
-      alert(
-        "Seleccioná un método de pago."
-      );
-
-      return;
-    }
-
-
+    if(guardandoPedido)return;
+    if(!sessionStorage.getItem('buyer_token')){alert('Iniciá sesión para registrar el pedido.');return;}
+    if(!listaCarrito.length){alert('Tu carrito está vacío.');return;}
+    setGuardandoPedido(true);
     try {
-
-      // -------------------------------------------------------
-      // PREPARAR PRODUCTOS
-      // -------------------------------------------------------
-
-      const carritoParaMercadoPago =
-        listaCarrito.map(
-          (element, index) => {
-
-            const precioProducto =
-              Number(element.Precio);
-
-
-            console.log(
-              `PRODUCTO ${index + 1}:`,
-              element
-            );
-
-
-            console.log(
-              "PRECIO:",
-              precioProducto
-            );
-
-
-            // Verificar destino
-
-            if (!element.Destino) {
-
-              throw new Error(
-                `El producto ${index + 1} no tiene destino.`
-              );
-            }
-
-
-            // Verificar precio
-
-            if (
-              !Number.isFinite(precioProducto) ||
-              precioProducto <= 0
-            ) {
-
-              throw new Error(
-                `El producto "${element.Destino}" tiene un precio inválido.`
-              );
-            }
-
-
-            return {
-
-              id: String(
-                element.Codigo ||
-                element.id ||
-                element.Destino
-              ),
-
-              title: String(
-                element.Destino ||
-                "Producto AirTrip"
-              ),
-
-              unit_price:
-                precioProducto,
-
-              tipo: element.tipoProducto || (element.Transporte ? "viaje" : "paquete"),
-              quantity: 1,
-            };
-          }
-        );
-
-
-      console.log(
-        "===================================="
-      );
-
-      console.log(
-        "PRODUCTOS QUE SE ENVIARÁN:"
-      );
-
-      console.log(
-        carritoParaMercadoPago
-      );
-
-      console.log(
-        "===================================="
-      );
-
-
-      // -------------------------------------------------------
-      // ENVIAR AL BACKEND
-      // -------------------------------------------------------
-
-      const response =
-        await apiFetch(
-          `${API_URL}/carrito`,
-          {
-
-            method: "POST",
-
-            headers: {
-              Authorization: `Bearer ${sessionStorage.getItem("buyer_token") || ""}`,
-              "Content-Type":
-                "application/json",
-            },
-
-            body: JSON.stringify({
-
-              items:
-                carritoParaMercadoPago,
-
-              user:
-                mail_guardado,
-
-            }),
-          }
-        );
-
-
-      // -------------------------------------------------------
-      // LEER RESPUESTA
-      // -------------------------------------------------------
-
-      const data =
-        await response.json();
-
-
-      console.log(
-        "===================================="
-      );
-
-      console.log(
-        "STATUS:",
-        response.status
-      );
-
-      console.log(
-        "OK:",
-        response.ok
-      );
-
-      console.log(
-        "RESPUESTA BACKEND:",
-        data
-      );
-
-      console.log(
-        "===================================="
-      );
-
-
-      // -------------------------------------------------------
-      // ERROR HTTP
-      // -------------------------------------------------------
-
-      if (!response.ok) {
-
-        throw new Error(
-
-          data.detail ||
-          data.error ||
-          "El backend devolvió un error."
-
-        );
-      }
-
-
-      // -------------------------------------------------------
-      // ERROR DEVUELTO POR EL BACKEND
-      // -------------------------------------------------------
-
-      if (data.error) {
-
-        console.error(
-          "ERROR DE MERCADO PAGO:"
-        );
-
-        console.error(
-          data.error
-        );
-
-        console.error(
-          "DETALLE:",
-          data.detalle
-        );
-
-
-        let detalle = "";
-
-
-        if (data.detalle) {
-
-          if (
-            typeof data.detalle ===
-            "string"
-          ) {
-
-            detalle =
-              data.detalle;
-
-          } else {
-
-            detalle =
-              JSON.stringify(
-                data.detalle
-              );
-          }
-        }
-
-
-        throw new Error(
-
-          data.error +
-          (
-            detalle
-              ? `\n\nDetalle: ${detalle}`
-              : ""
-          )
-
-        );
-      }
-
-
-      // -------------------------------------------------------
-      // OBTENER URL DE MERCADO PAGO
-      // -------------------------------------------------------
-
-      const checkoutUrl =
-        data.init_point ||
-        data.sandbox_init_point;
-
-
-      console.log(
-        "===================================="
-      );
-
-      console.log(
-        "URL MERCADO PAGO:"
-      );
-
-      console.log(
-        checkoutUrl
-      );
-
-      console.log(
-        "===================================="
-      );
-
-
-      // -------------------------------------------------------
-      // VERIFICAR URL
-      // -------------------------------------------------------
-
-      if (!checkoutUrl) {
-
-        throw new Error(
-          "El backend no recibió una URL de Mercado Pago."
-        );
-      }
-
-
-      // -------------------------------------------------------
-      // REDIRECCIONAR
-      // -------------------------------------------------------
-
-      console.log(
-        "REDIRIGIENDO A MERCADO PAGO..."
-      );
-
-
-      window.location.href =
-        checkoutUrl;
-
-
-    } catch (error) {
-
-      console.error(
-        "===================================="
-      );
-
-      console.error(
-        "ERROR COMPLETO DEL PAGO:"
-      );
-
-      console.error(
-        error
-      );
-
-      console.error(
-        "===================================="
-      );
-
-
-      alert(
-
-        "No se pudo iniciar el pago con Mercado Pago.\n\n" +
-        error.message
-
-      );
-    }
+      const items=listaCarrito.map(item=>({id:Number(item.Codigo||item.id),tipo:item.tipoProducto||(item.Transporte?'viaje':'paquete'),quantity:1}));
+      await apiFetch(`${API_URL}/clientes/pedidos`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${sessionStorage.getItem('buyer_token')}`},body:JSON.stringify({items})});
+      setListaCarrito([]);setMostarPaginaCompra(false);setMostrarCarrito(false);navigate('/mis-pedidos');
+    }catch(error){alert(error.message);}finally{setGuardandoPedido(false);}
   };
-
-
-  // =========================================================
-  // FILTROS
-  // =========================================================
 
   const handlerFiltar = () => {
 
@@ -1291,7 +938,7 @@ const Inside = ({ showHero = true }) => {
 
 
             <h1 className="titulo-compra">
-              ¡Termina tu compra!
+              Revisá tu pedido
             </h1>
 
 
@@ -1340,119 +987,21 @@ const Inside = ({ showHero = true }) => {
             </div>
 
 
-            <label className="cont-compra-label">
-
-              ¿Deseás realizar el pago en cuotas?
-
-
-              <input
-                type="checkbox"
-                checked={tieneCuotas}
-                onChange={(e) =>
-                  setTieneCoutas(
-                    e.target.checked
-                  )
-                }
-              />
-
-            </label>
-
-
-            {tieneCuotas && (
-
-              <>
-
-                <label
-                  className="cont-compra-label"
-                  htmlFor="cuotas"
-                >
-                  Selecciona la cantidad de cuotas:
-                </label>
-
-
-                <select
-                  id="cuotas"
-                  value={cuotas}
-                  onChange={(e) =>
-                    setCuotas(
-                      Number(
-                        e.target.value
-                      )
-                    )
-                  }
-                >
-
-                  <option value={3}>
-                    3 cuotas
-                  </option>
-
-                  <option value={6}>
-                    6 cuotas
-                  </option>
-
-                  <option value={9}>
-                    9 cuotas
-                  </option>
-
-                  <option value={12}>
-                    12 cuotas
-                  </option>
-
-                </select>
-
-              </>
-
-            )}
-
-
-            <label
-              className="cont-compra-label"
-              htmlFor="m_pago"
-            >
-              Método de pago
-            </label>
-
-
-            <select
-              id="m_pagos"
-              onChange={(e) =>
-                setMetodoPago(
-                  e.target.value
-                )
-              }
-            >
-
-              <option value={undefined}>
-                Selecciona un método de pago
-              </option>
-
-              <option value="Transferencia_bancaria">
-                Transferencia bancaria
-              </option>
-
-              <option value="tarjeta_debito">
-                Tarjeta de débito
-              </option>
-
-              <option value="tarjeta_credito">
-                Tarjeta de crédito
-              </option>
-
-            </select>
-
+            <p>Primero registrá el pedido. Después podrás revisarlo y elegir el medio de pago en Mercado Pago desde Mis pedidos.</p>
 
             <h2>
-              Total pagado: ${precioTotal}
+              Total del pedido: ${precioTotal}
             </h2>
 
 
             <button
               className="btn-vuelos"
+              disabled={guardandoPedido}
               onClick={
                 handleEnviarVenta
               }
             >
-              Comprar
+              {guardandoPedido ? 'Registrando…' : 'Registrar pedido'}
             </button>
 
           </div>

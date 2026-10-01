@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 # ===============================
 #       Conexión con la Base de Datos
 # ===============================
@@ -58,12 +59,15 @@ def verViajesSimples():
     conn = get_connection()
     cur = conn.cursor()
     try:
-        cur.execute("SELECT * FROM viaje_simple")
+        cur.execute("SELECT * FROM viaje_simple WHERE eliminado_en IS NULL")
         respuesta = cur.fetchall()
         nrepuesta = convertirDatosTVS(respuesta)
 
         return nrepuesta
 
+    except HTTPException:
+        conn.rollback()
+        raise
     except Exception as e:
         conn.rollback()
         return {"error": str(e)}
@@ -85,6 +89,7 @@ def agregarViajeSimple(data):
     conn = get_connection()
     cur = conn.cursor()
     try:
+        cur.execute("LOCK TABLE viaje_simple IN SHARE ROW EXCLUSIVE MODE")
         cur.execute("SELECT MAX(codigo) FROM viaje_simple")
         max_id = cur.fetchone()
         if max_id[0] is None:
@@ -113,6 +118,9 @@ def agregarViajeSimple(data):
 
         return {"Mensaje": "Nuevo viaje simple agregado"}
 
+    except HTTPException:
+        conn.rollback()
+        raise
     except Exception as e:
         conn.rollback()
         return {"error": str(e)}
@@ -145,6 +153,9 @@ def quitarViajesimple(codigoDeViaje):
         conn.commit()
 
         return {"Mensaje": "Viaje borrado exitosamente"}
+    except HTTPException:
+        conn.rollback()
+        raise
     except Exception as e:
         conn.rollback()
         return {"error": str(e)}

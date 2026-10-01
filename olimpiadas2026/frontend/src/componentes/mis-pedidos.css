@@ -1,0 +1,8 @@
+.mis-pedidos {width:min(900px,92%);margin:2rem auto;color:#17334b;}
+.mis-pedidos article {background:white;border:1px solid #d5e1ea;border-radius:16px;padding:1.5rem;margin:1rem 0;overflow-wrap:anywhere;}
+.mis-pedidos button {padding:.7rem 1rem;border-radius:8px;cursor:pointer;}
+
+.mis-pedidos form {display:grid;gap:1rem;margin:1rem 0;}
+.mis-pedidos label {display:block;margin:.5rem 0;}
+.mis-pedidos input,.mis-pedidos select,.mis-pedidos textarea {margin:.3rem;max-width:100%;}
+.mis-pedidos td,.mis-pedidos th {padding:.7rem;text-align:left;border-bottom:1px solid #d5e1ea;}

@@ -71,3 +71,10 @@ Para otro entorno, aplicar el SQL sobre la base correcta antes de iniciar esta v
 - Consultas reales de solo lectura del resumen, catálogos y ficha en Supabase, sin volcar datos personales.
 - No se ejecutan pagos ni correos de prueba automáticamente; no se confirma una venta ficticia.
 - Pendiente la prueba visual con cuenta administrativa y recorrido completo de compra. La gestión de devoluciones, permisos granulares y reportes exportables queda fuera de esta entrega.
+
+
+Actualización: se implementó la confirmación de pagos y el envío de comprobantes. Ver [comprobantes](correos-compra.md) para configuración, validaciones y límites; reemplaza la indicación anterior de conciliación pendiente.
+
+La consulta del comprador y la edición administrativa de estados se detallan en [Estados de pedidos](estados-pedidos.md). Separa el estado de gestión del pago y registra el historial de cada cambio.
+
+La opción Eliminar y la restauración de registros se describen en [Papelera administrativa](papelera-administrativa.md). Incluye efectos sobre cuentas, catálogo y pagos, y la migración 005.

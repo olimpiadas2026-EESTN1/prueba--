@@ -46,9 +46,10 @@ def retornar_viaje_simple():
 
 # ---- Eliminar viaje simple ----
 @router.post("/eliminar", dependencies=[Depends(require_admin)])
-def eliminar_viaje_simple(data: Viaje_simple_id):
+def eliminar_viaje_simple(data: Viaje_simple_id, admin=Depends(require_admin)):
     """
     Elimina un viaje simple de la base de datos usando su código.
     """
-    res = quitarViajesimple(data.vs_id)
+    from modulos.papelera import cambiar
+    res = cambiar("viajes", data.vs_id, "Baja desde endpoint compatible", admin)
     return res

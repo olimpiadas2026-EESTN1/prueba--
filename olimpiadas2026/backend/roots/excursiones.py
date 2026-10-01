@@ -89,9 +89,10 @@ def retornar_excursionesPorPV(data: Paquete_de_viaje_id):
 
 # ---- Eliminar excursión por ID ----
 @router.post("/eliminar", dependencies=[Depends(require_admin)])
-def eliminar_excursiones(data: Excursiones_id):
+def eliminar_excursiones(data: Excursiones_id, admin=Depends(require_admin)):
     """
     Elimina una excursión dado su ID.
     """
-    res = eliminarExcursion(data.excursion_id)
+    from modulos.papelera import cambiar
+    res = cambiar("excursiones", data.excursion_id, "Baja desde endpoint compatible", admin)
     return res

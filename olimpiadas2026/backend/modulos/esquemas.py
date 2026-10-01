@@ -1,7 +1,7 @@
 # ===============================
 #   Creación de modelos Pydantic
 # ===============================
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 
 
@@ -10,7 +10,7 @@ class Usuarios_comunes(BaseModel):
     Modelo Pydantic para la creación de usuarios comunes.
     """
 
-    nombre: str
+    nombre: str = Field(min_length=1,max_length=2000)
     apellido: str
     contraseña: str
     correo_electronico: str
@@ -21,7 +21,7 @@ class Usuarios_comunes_id(BaseModel):
     Modelo Pydantic para obtener la id de un usuario comun.
     """
 
-    uc_id: int
+    uc_id: int = Field(gt=0)
 
 
 class Ventas(BaseModel):
@@ -34,7 +34,7 @@ class Ventas(BaseModel):
     cantidad: Optional[int] = None
     codigo_vs: Optional[int] = None
     codigo_pv: Optional[int] = None
-    precio: float
+    precio: float = Field(gt=0, allow_inf_nan=False)
 
 
 class Venta_request(BaseModel):
@@ -51,7 +51,7 @@ class Venta_id(BaseModel):
     Modelo Pydantic para obtener la id de una venta.
     """
 
-    vtas_id: int
+    vtas_id: int = Field(gt=0)
 
 
 class Viaje_simple(BaseModel):
@@ -59,15 +59,15 @@ class Viaje_simple(BaseModel):
     Modelo Pydantic para representar un viaje simple.
     """
 
-    nombre: str
-    descripcion: str
-    precio: float
-    origen: str
-    destino: str
+    nombre: str = Field(min_length=1,max_length=2000)
+    descripcion: str = Field(min_length=1,max_length=2000)
+    precio: float = Field(gt=0, allow_inf_nan=False)
+    origen: str = Field(min_length=1,max_length=2000)
+    destino: str = Field(min_length=1,max_length=2000)
     transporte: str
     fecha: str  # Formato recomendado: 'dd/mm/yy'
     hora: str  # Formato recomendado: 'HH:MM'
-    cupos: int
+    cupos: int = Field(ge=0)
     duracion_aprox: str
     tipo_de_viaje: str  # Valores: 'solo ida' o 'ida y vuelta'
 
@@ -77,7 +77,7 @@ class Viaje_simple_id(BaseModel):
     Modelo Pydantic para representar la ID de un viaje simple.
     """
 
-    vs_id: int
+    vs_id: int = Field(gt=0)
 
 
 class Paquete_de_viaje(BaseModel):
@@ -85,14 +85,14 @@ class Paquete_de_viaje(BaseModel):
     Modelo Pydantic para representar un paquete de viaje.
     """
 
-    nombre: str
-    precio: float
-    origen: str
-    destino: str
+    nombre: str = Field(min_length=1,max_length=2000)
+    precio: float = Field(gt=0, allow_inf_nan=False)
+    origen: str = Field(min_length=1,max_length=2000)
+    destino: str = Field(min_length=1,max_length=2000)
     estadia: str
     tipo: str  # Valores: 'solo ida' o 'ida y vuelta'
-    descripcion: str
-    cupos: int
+    descripcion: str = Field(min_length=1,max_length=2000)
+    cupos: int = Field(ge=0)
     duracion: str
     tipo_de_viaje: str  # Valores: 'nacional' o 'internacional'
     hora: str  # Formato recomendado: 'HH:MM'
@@ -104,7 +104,7 @@ class Codigo_paquete_de_viaje(BaseModel):
     Modelo Pydantic para obtener el codigo de un paquete de viaje
     """
 
-    codigoDeViaje: int
+    codigoDeViaje: int = Field(gt=0)
 
 
 class Paquete_de_viaje_id(BaseModel):
@@ -112,7 +112,7 @@ class Paquete_de_viaje_id(BaseModel):
     Modelo Pydantic para representar la id de un paquete de viaje.
     """
 
-    pv_id: int
+    pv_id: int = Field(gt=0)
 
 
 class Auto(BaseModel):
@@ -120,9 +120,9 @@ class Auto(BaseModel):
     Modelo Pydantic para representar un auto disponible para alquiler.
     """
 
-    modelo: str
-    disponibles: int
-    precio_por_dia: float
+    modelo: str = Field(min_length=1,max_length=2000)
+    disponibles: int = Field(ge=0)
+    precio_por_dia: float = Field(gt=0, allow_inf_nan=False)
 
 
 class Auto_id(BaseModel):
@@ -130,7 +130,7 @@ class Auto_id(BaseModel):
     Modelo Pydantic para representar el id de un auto.
     """
 
-    auto_id: int
+    auto_id: int = Field(gt=0)
 
 
 class Vinculo_vs_a_auto(BaseModel):
@@ -138,8 +138,8 @@ class Vinculo_vs_a_auto(BaseModel):
     Modelo Pydantic para representar el vinculo de un viaje simple a un auto
     """
 
-    vs_id: int
-    at_id: int
+    vs_id: int = Field(gt=0)
+    at_id: int = Field(gt=0)
 
 
 class Vinculo_pv_a_auto(BaseModel):
@@ -147,8 +147,8 @@ class Vinculo_pv_a_auto(BaseModel):
     Modelo Pydantic para representar el vinculo de un paquete de viajes a un auto
     """
 
-    pv_id: int
-    at_id: int
+    pv_id: int = Field(gt=0)
+    at_id: int = Field(gt=0)
 
 
 class Excursiones(BaseModel):
@@ -156,11 +156,11 @@ class Excursiones(BaseModel):
     Modelo Pydantic para representar una excursión.
     """
 
-    nombre: str
+    nombre: str = Field(min_length=1,max_length=2000)
     inicio: str  # Hora de inicio (se recomienda formato 'HH:MM')
     final: str  # Hora de finalización (se recomienda formato 'HH:MM')
-    descripcion: str
-    lugar: str
+    descripcion: str = Field(min_length=1,max_length=2000)
+    lugar: str = Field(min_length=1,max_length=2000)
 
 
 class Excursiones_id(BaseModel):
@@ -168,7 +168,7 @@ class Excursiones_id(BaseModel):
     Modelo Pydantic para representar la ID de una Excursion.
     """
 
-    excursion_id: int
+    excursion_id: int = Field(gt=0)
 
 
 class Vinculo_pv_a_exc(BaseModel):
@@ -176,8 +176,8 @@ class Vinculo_pv_a_exc(BaseModel):
     Modelo Pydantic para representar el vinculo de un paquete de viaje a una excursion.
     """
 
-    pv_id: int
-    exc_id: int
+    pv_id: int = Field(gt=0)
+    exc_id: int = Field(gt=0)
 
 
 class Validacion_de_usuarios(BaseModel):

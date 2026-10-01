@@ -63,7 +63,7 @@ def verClientes():
     conn = get_connection()
     cur = conn.cursor()
     try:
-        cur.execute("SELECT * FROM usuario_comun")
+        cur.execute("SELECT * FROM usuario_comun WHERE eliminado_en IS NULL")
         respuesta = cur.fetchall()
         usuarios = []
         for usuario in respuesta:
@@ -120,7 +120,7 @@ def verClienteId(data):
     conn = get_connection()
     cur = conn.cursor()
     try:
-        cur.execute("SELECT * FROM usuario_comun WHERE uc_id = %s", (data.uc_id,))
+        cur.execute("SELECT * FROM usuario_comun WHERE uc_id = %s AND eliminado_en IS NULL", (data.uc_id,))
         respuesta = cur.fetchall()
         dicConvertido = []
         dicConvertido.append(
@@ -151,7 +151,7 @@ def validarCliente(data):
     conn = get_connection()
     cur = conn.cursor()
     try:
-        cur.execute("SELECT contraseña, correo_electronico FROM usuario_comun")
+        cur.execute("SELECT contraseña, correo_electronico FROM usuario_comun WHERE eliminado_en IS NULL")
         res = cur.fetchall()
         for i in res:
             if data.usuarioIngresado == i[1]:

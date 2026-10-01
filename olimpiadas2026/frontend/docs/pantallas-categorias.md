@@ -53,3 +53,11 @@ Lista de aceptación manual:
 - Probar API detenida y catálogo vacío, sin confundir esos estados.
 
 Limitaciones previas: los formularios decorativos de la portada no implementan todos los filtros que muestran; los diálogos existentes requieren una revisión específica de accesibilidad. Esta entrega organiza las pantallas y no afirma completar esos flujos.
+
+## Autos
+
+La ruta `/autos` se accede desde la navegación principal y el pie de página. Consulta `/autos/obtener` y muestra modelo, código, precio diario en ARS y unidades disponibles. Permite búsqueda por texto del modelo, orden por modelo o precio, y filtro de disponibilidad. Incluye estados de carga, error con reintento y lista vacía, además de diseño adaptable a celular.
+
+Los registros DEMO se identifican como demostración. La pantalla no agrega autos al carrito: el checkout actual solo admite viajes y paquetes. Se explica que los autos se ofrecen como componentes vinculados y se enlaza a paquetes y vuelos. La reserva individual requiere un desarrollo separado.
+
+Verificación: compilación de producción del frontend correcta. Prueba visual pendiente en el navegador del usuario.

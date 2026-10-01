@@ -47,7 +47,7 @@ from modulos.esquemas import (
 # ---- Crear nuevo auto ----
 
 @router.post("/ingresar", dependencies=[Depends(require_admin)])
-async def ingresar_autos(data: Auto):
+def ingresar_autos(data: Auto):
     """
     Recibe los datos de un auto y lo agrega a la base de datos.
     """
@@ -59,7 +59,7 @@ async def ingresar_autos(data: Auto):
 # ---- Crear relación de viaje simple a auto ----
 
 @router.post("/ingresarVinculoVS", dependencies=[Depends(require_admin)])
-async def ingresar_vinculos_VS(data: Vinculo_vs_a_auto):
+def ingresar_vinculos_VS(data: Vinculo_vs_a_auto):
     """
     Recibe los IDs de un viaje simple y un auto,
     y crea la relación.
@@ -72,7 +72,7 @@ async def ingresar_vinculos_VS(data: Vinculo_vs_a_auto):
 # ---- Crear relación de paquete de viaje a auto ----
 
 @router.post("/ingresarVinculoPV", dependencies=[Depends(require_admin)])
-async def ingresar_vinculos_PV(data: Vinculo_pv_a_auto):
+def ingresar_vinculos_PV(data: Vinculo_pv_a_auto):
     """
     Recibe los IDs de un paquete de viaje y un auto,
     y crea la relación.
@@ -85,7 +85,7 @@ async def ingresar_vinculos_PV(data: Vinculo_pv_a_auto):
 # ---- Obtener lista de autos ----
 
 @router.get("/obtener")
-async def retornar_autos():
+def retornar_autos():
     """
     Devuelve la lista de autos almacenados.
     """
@@ -97,7 +97,7 @@ async def retornar_autos():
 # ---- Obtener auto por ID ----
 
 @router.post("/obtenerID")
-async def retornar_autosPorID(data: Auto_id):
+def retornar_autosPorID(data: Auto_id):
     """
     Devuelve un auto utilizando su ID.
     """
@@ -109,7 +109,7 @@ async def retornar_autosPorID(data: Auto_id):
 # ---- Obtener autos relacionados a un paquete de viaje ----
 
 @router.post("/obtenerPV")
-async def retornar_autosPorPV(data: Paquete_de_viaje_id):
+def retornar_autosPorPV(data: Paquete_de_viaje_id):
     """
     Devuelve los autos relacionados a un paquete de viaje.
     """
@@ -121,7 +121,7 @@ async def retornar_autosPorPV(data: Paquete_de_viaje_id):
 # ---- Obtener autos relacionados a un viaje simple ----
 
 @router.post("/obtenerVS")
-async def retornar_autosPorVS(data: Viaje_simple_id):
+def retornar_autosPorVS(data: Viaje_simple_id):
     """
     Devuelve los autos relacionados a un viaje simple.
     """
@@ -133,11 +133,12 @@ async def retornar_autosPorVS(data: Viaje_simple_id):
 # ---- Eliminar un auto por ID ----
 
 @router.post("/eliminar", dependencies=[Depends(require_admin)])
-async def eliminar_autos(data: Auto_id):
+def eliminar_autos(data: Auto_id, admin=Depends(require_admin)):
     """
     Elimina un auto de la base de datos utilizando su ID.
     """
 
-    res = borrarAuto(data.auto_id)
+    from modulos.papelera import cambiar
+    res = cambiar("autos", data.auto_id, "Baja desde endpoint compatible", admin)
     return res
 

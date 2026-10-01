@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 # ==============================
 #   Conversión de fecha y hora
 # ==============================
@@ -9,7 +10,10 @@ def convertirDate(fecha):
     """
     Convierte una cadena de fecha en formato 'dd/mm/yy' a un objeto datetime.date.
     """
-    nfecha = datetime.strptime(fecha, "%d/%m/%y").date()
+    try:
+        nfecha = datetime.strptime(fecha, "%d/%m/%y").date()
+    except (ValueError,TypeError):
+        raise HTTPException(422, 'Fecha inválida: usá DD/MM/AA')
     return nfecha
 
 
@@ -17,7 +21,10 @@ def convertirHora(hora):
     """
     Convierte una cadena de hora en formato 'HH:MM' a un objeto datetime.time.
     """
-    nhora = datetime.strptime(hora, "%H:%M").time()
+    try:
+        nhora = datetime.strptime(hora, "%H:%M").time()
+    except (ValueError,TypeError):
+        raise HTTPException(422, 'Hora inválida: usá HH:MM')
     return nhora
 
 

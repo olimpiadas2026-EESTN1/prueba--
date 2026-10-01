@@ -1,3 +1,5 @@
+from fastapi import HTTPException
+from modulos.gestion import query
 # ===============================
 #   Conexión con la Base de Datos
 # ===============================
@@ -24,6 +26,7 @@ def agregarExcursiones(data):
     conn = get_connection()
     cur = conn.cursor()
     try:
+        cur.execute("LOCK TABLE excursiones IN SHARE ROW EXCLUSIVE MODE")
         cur.execute("SELECT MAX(excursion_id) FROM excursiones")
         max_id = cur.fetchone()
         if max_id[0] is None:
@@ -49,6 +52,9 @@ def agregarExcursiones(data):
 
         return {"Mensaje": "Se ha agregado la excursion exitosamente"}
 
+    except HTTPException:
+        conn.rollback()
+        raise
     except Exception as e:
         conn.rollback()
         return {"error": str(e)}
@@ -82,6 +88,9 @@ def eliminarExcursion(excursion_id):
 
         return {"Mensaje": "Borrado exitosamente"}
 
+    except HTTPException:
+        conn.rollback()
+        raise
     except Exception as e:
         conn.rollback()
         return {"error": str(e)}
@@ -99,7 +108,7 @@ def verExcursiones():
     conn = get_connection()
     cur = conn.cursor()
     try:
-        cur.execute("SELECT * FROM excursiones")
+        cur.execute("SELECT * FROM excursiones WHERE eliminado_en IS NULL")
         respuesta = cur.fetchall()
         excursiones = []
 
@@ -120,6 +129,9 @@ def verExcursiones():
             excursiones.append(excursion)
         return excursiones
 
+    except HTTPException:
+        conn.rollback()
+        raise
     except Exception as e:
         conn.rollback()
         return {"error": str(e)}
@@ -135,94 +147,17 @@ def verExcursiones():
 
 
 def paqueteViajesExcursion(data):
-    """
-    Vincula una excursión con un paquete de viajes.
-    """
-    conn = get_connection()
-    cur = conn.cursor()
-    try:
-        cur.execute(
-            "INSERT INTO pv_exc (pv_id, exc_id) VALUES (%s,%s)",
-            (data.pv_id, data.exc_id),
-        )
-        conn.commit()
-
-        return {"Mensaje": "Se ha vinculado una excursion con un paquete de viajes"}
-
-    except Exception as e:
-        conn.rollback()
-        return {"error": str(e)}
-
-    finally:
-        cur.close()
-        conn.close()
-
-
-# ===============================
-#          Consultas
-# ===============================
-
+    """Vincula productos activos sin duplicar la relación."""
+    from modulos.vinculos_catalogo import vincular
+    return vincular('pv_exc',data.pv_id,data.exc_id)
 
 def buscarExcursionporId(data):
-    """
-    Busca una excursión por su ID y devuelve sus detalles.
-    """
-    conn = get_connection()
-    cur = conn.cursor()
-    try:
-        cur.execute(
-            "SELECT * FROM excursiones WHERE excursion_id = %s", (data.excursion_id,)
-        )
-        respuesta = cur.fetchall()
-        dicExcursiones = []
-
-        inicio = respuesta[0][2]
-        inicio = inicio.strftime("%H:%M:%S")
-        final = respuesta[0][3]
-        final = final.strftime("%H:%M:%S")
-
-        dicExcursiones.append(
-            {
-                "Excursion id": respuesta[0][0],
-                "Nombre": respuesta[0][1],
-                "Inicio": inicio,
-                "Final": final,
-                "Descripcion": respuesta[0][4],
-                "Lugar": respuesta[0][5],
-            }
-        )
-
-        return dicExcursiones
-
-    except Exception as e:
-        conn.rollback()
-        return {"error": str(e)}
-
-    finally:
-        cur.close()
-        conn.close()
-
+    """Mantiene la lista esperada por el frontend y devuelve 404 si no existe."""
+    rows=query("""SELECT excursion_id AS "Excursion id",nombre AS "Nombre",to_char(inicio,'HH24:MI:SS') AS "Inicio",to_char(final,'HH24:MI:SS') AS "Final",descripcion AS "Descripcion",lugar AS "Lugar" FROM excursiones WHERE excursion_id=%s AND eliminado_en IS NULL""",(data.excursion_id,))
+    if not rows: raise HTTPException(404,'Excursión no encontrada')
+    return rows
 
 def verExcursionPaquete(data):
-    """
-    Devuelve una lista de excursiones asociadas a un paquete de viaje.
-    """
-    conn = get_connection()
-    cur = conn.cursor()
-    try:
-        cur.execute("SELECT exc_id FROM pv_exc WHERE pv_id = %s", (data.pv_id,))
-        respuesta = cur.fetchall()
-        dicAutos = []
-        for i in respuesta:
-            data = SimpleNamespace(excursion_id=i[0])
-            dicAutos.append(buscarExcursionporId(data))
-
-        return dicAutos
-
-    except Exception as e:
-        conn.rollback()
-        return {"error": str(e)}
-
-    finally:
-        cur.close()
-        conn.close()
+    """Una consulta; conserva el formato de listas usado por paquetes."""
+    rows=query("""SELECT DISTINCT e.excursion_id AS "Excursion id",e.nombre AS "Nombre",to_char(e.inicio,'HH24:MI:SS') AS "Inicio",to_char(e.final,'HH24:MI:SS') AS "Final",e.descripcion AS "Descripcion",e.lugar AS "Lugar" FROM pv_exc x JOIN excursiones e ON e.excursion_id=x.exc_id JOIN paquete_de_viajes p ON p.codigo=x.pv_id WHERE x.pv_id=%s AND e.eliminado_en IS NULL AND p.eliminado_en IS NULL ORDER BY e.excursion_id""",(data.pv_id,))
+    return [[row] for row in rows]

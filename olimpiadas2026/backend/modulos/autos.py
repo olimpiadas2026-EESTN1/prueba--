@@ -1,3 +1,5 @@
+from fastapi import HTTPException
+from modulos.gestion import query
 # ===============================
 #   Conexión con la Base de Datos
 # ===============================
@@ -23,6 +25,7 @@ def agregarAuto(data):
     cur = conn.cursor()
 
     try:
+        cur.execute("LOCK TABLE auto IN SHARE ROW EXCLUSIVE MODE")
         cur.execute("SELECT MAX(auto_id) FROM auto")
         max_id = cur.fetchone()
         if max_id[0] is None:
@@ -38,6 +41,9 @@ def agregarAuto(data):
 
         return {"mensaje": "Nuevo auto cargado exitosamente"}
 
+    except HTTPException:
+        conn.rollback()
+        raise
     except Exception as e:
         conn.rollback()
         return {"error": str(e)}
@@ -75,6 +81,9 @@ def borrarAuto(auto_id):
         conn.commit()
 
         return {"Mensaje": "Auto eliminado exitosamente"}
+    except HTTPException:
+        conn.rollback()
+        raise
     except Exception as e:
         conn.rollback()
         return {"error": str(e)}
@@ -88,7 +97,7 @@ def verAutos():
     conn = get_connection()
     cur = conn.cursor()
     try:
-        cur.execute("SELECT *  FROM auto")
+        cur.execute("SELECT * FROM auto WHERE eliminado_en IS NULL")
         respuesta = cur.fetchall()
         autos = []
         for auto in respuesta:
@@ -102,6 +111,9 @@ def verAutos():
             autos.append(at)
 
         return autos
+    except HTTPException:
+        conn.rollback()
+        raise
     except Exception as e:
         conn.rollback()
         return {"error": str(e)}
@@ -117,129 +129,25 @@ def verAutos():
 
 
 def vinculaVSaAuto(data):
-    """
-    Vincula un auto (at_id) a un viaje simple (vs_id).
-    """
-    conn = get_connection()
-    cur = conn.cursor()
-    try:
-        cur.execute(
-            "INSERT INTO vs_at (vs_id, at_id) VALUES(%s,%s)", (data.vs_id, data.at_id)
-        )
-        conn.commit()
-
-        return {"Mensaje": "Se ha asignado un auto a un viaje simple"}
-
-    except Exception as e:
-        conn.rollback()
-        return {"error": str(e)}
-
-    finally:
-        cur.close()
-        conn.close()
-
+    """Vincula productos activos sin duplicar la relación."""
+    from modulos.vinculos_catalogo import vincular
+    return vincular('vs_at',data.vs_id,data.at_id)
 
 def vincularPVaAuto(data):
-    """
-    Vincula un auto (at_id) a un paquete de viajes (pv_id).
-    """
-    conn = get_connection()
-    cur = conn.cursor()
-    try:
-        cur.execute(
-            "INSERT INTO exc_at (pv_id, at_id) VALUES(%s,%s)", (data.pv_id, data.at_id)
-        )
-        conn.commit()
-
-        return {"Mensaje": "Se ha asignado un auto a un paquete de viajes"}
-
-    except Exception as e:
-        conn.rollback()
-        return {"error": str(e)}
-
-    finally:
-        cur.close()
-        conn.close()
-
-
-# ===============================
-#         Consultar autos
-# ===============================
-
+    """Vincula productos activos sin duplicar la relación."""
+    from modulos.vinculos_catalogo import vincular
+    return vincular('exc_at',data.pv_id,data.at_id)
 
 def verAutoID(data):
-    """
-    Devuelve la información de un auto por su ID.
-    """
-    conn = get_connection()
-    cur = conn.cursor()
-    try:
-        cur.execute("SELECT * FROM auto WHERE auto_Id = %s", (data.auto_id,))
-        respuesta = cur.fetchall()
-        respuesta = {
-            "auto id": respuesta[0][0],
-            "modelo": respuesta[0][1],
-            "disponibles": respuesta[0][2],
-            "precio por dia": respuesta[0][3],
-        }
-
-        return respuesta
-
-    except Exception as e:
-        conn.rollback()
-        return {"error": str(e)}
-
-    finally:
-        cur.close()
-        conn.close()
-
+    """Devuelve un auto activo o 404 sin exponer errores SQL."""
+    rows=query('SELECT auto_id AS "auto id",modelo,disponibles,precio_por_dia AS "precio por dia" FROM auto WHERE auto_id=%s AND eliminado_en IS NULL',(data.auto_id,))
+    if not rows: raise HTTPException(404,'Auto no encontrado')
+    return rows[0]
 
 def verAutoPV(data):
-    """
-    Devuelve todos los autos vinculados a un paquete de viajes.
-    """
-    conn = get_connection()
-    cur = conn.cursor()
-    try:
-        cur.execute("SELECT at_id FROM exc_at WHERE pv_id = %s", (data.pv_id,))
-        respuesta = cur.fetchall()
-
-        dicAutos = []
-        for i in respuesta:
-            data = SimpleNamespace(auto_id=i[0])
-            dicAutos.append(verAutoID(data))
-
-        return dicAutos
-
-    except Exception as e:
-        conn.rollback()
-        return {"error": str(e)}
-
-    finally:
-        cur.close()
-        conn.close()
-
+    """Consulta los autos relacionados en una sola conexión."""
+    return query('SELECT DISTINCT a.auto_id AS "auto id",a.modelo,a.disponibles,a.precio_por_dia AS "precio por dia" FROM exc_at x JOIN auto a ON a.auto_id=x.at_id JOIN paquete_de_viajes p ON p.codigo=x.pv_id WHERE x.pv_id=%s AND a.eliminado_en IS NULL AND p.eliminado_en IS NULL ORDER BY a.auto_id',(data.pv_id,))
 
 def verAutoVs(data):
-    """
-    Devuelve todos los autos vinculados a un viaje simple.
-    """
-    conn = get_connection()
-    cur = conn.cursor()
-    try:
-        cur.execute("SELECT at_id FROM vs_at WHERE vs_id = %s", (data.vs_id,))
-        respuesta = cur.fetchall()
-        dicAutos = []
-        for i in respuesta:
-            data = SimpleNamespace(auto_id=i[0])
-            dicAutos.append(verAutoID(data))
-
-        return dicAutos
-
-    except Exception as e:
-        conn.rollback()
-        return {"error": str(e)}
-
-    finally:
-        cur.close()
-        conn.close()
+    """Consulta los autos relacionados en una sola conexión."""
+    return query('SELECT DISTINCT a.auto_id AS "auto id",a.modelo,a.disponibles,a.precio_por_dia AS "precio por dia" FROM vs_at x JOIN auto a ON a.auto_id=x.at_id JOIN viaje_simple p ON p.codigo=x.vs_id WHERE x.vs_id=%s AND a.eliminado_en IS NULL AND p.eliminado_en IS NULL ORDER BY a.auto_id',(data.vs_id,))

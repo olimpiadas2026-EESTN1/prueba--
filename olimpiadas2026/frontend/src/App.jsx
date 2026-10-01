@@ -1,3 +1,7 @@
+import Autos from "./componentes/autos";
+import Productos from "./componentes/productos";
+import Ayuda from "./componentes/ayuda";
+import MisPedidos from "./componentes/mis-pedidos";
 import AdminPage from "./admin/AdminPage";
 import { API_URL, apiFetch } from "./api";
 import { Routes, Route, useLocation,useNavigate,Link } from 'react-router-dom' 
@@ -98,6 +102,10 @@ const {precio} =useContext(AuthContext)
       <Route path="login" element={<Login />} />
       <Route path="sing-up" element={<SingUp />} />
       <Route path="vuelos" element={<Vuelos />} />
+      <Route path="productos" element={<Productos />} />
+      <Route path="ayuda" element={<Ayuda />} />
+      <Route path="mis-pedidos" element={<MisPedidos />} />
+      <Route path="autos" element={<Autos />} />
       <Route path="micros" element={<Micros />} />
       <Route path="paquetes" element={<Paquetes />} />
     </Route>
@@ -116,6 +124,7 @@ const {precio} =useContext(AuthContext)
         <li><Link to={"/vuelos"}>Vuelos</Link></li>
         <li><Link to={"/paquetes"}>Paquetes</Link></li>
         <li><Link to={"/micros"}>Micros</Link></li>
+        <li><Link to="/autos">Autos</Link></li>
         <li><Link to={"/login"}>Log in</Link></li>
         <li><Link to="/admin">Administración</Link></li>
       </ul>

@@ -28,3 +28,6 @@ El panel administrativo incluye:
 Los pedidos se registran al iniciar el checkout; la conciliación de pagos para convertirlos automáticamente en ventas confirmadas sigue pendiente. Las sesiones actuales duran una hora y viven en un único proceso: antes de desplegar con varios workers o serverless se requiere un almacén compartido.
 
 Validación: compilación del frontend y siete pruebas automatizadas del backend. Para ejecutar estas últimas, instalar `backend/requirements-dev.txt` y ejecutar desde `backend` `.venv/bin/python -m unittest discover -s tests -v`.
+
+
+Actualización: se implementó la confirmación de pagos y el envío de comprobantes. Ver [comprobantes](olimpiadas2026/frontend/docs/correos-compra.md) para configuración, validaciones y límites; reemplaza la indicación anterior de conciliación pendiente.

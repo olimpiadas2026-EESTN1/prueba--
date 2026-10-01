@@ -17,3 +17,12 @@ If you are developing a production application, we recommend using TypeScript wi
 - [Instalación, conexión y datos de demostración](docs/desarrollo-local.md)
 - [Administración: acceso separado, hook, permisos y pruebas](docs/administracion.md)
 - [Gestión relacional: usuarios, pedidos, ventas y auditoría](docs/gestion-relacional.md)
+- [Comprobantes con Gmail API oficial y verificación de pagos](docs/correos-compra.md)
+
+### Preparación de la entrega del 02/10
+
+- [Plan y responsables](docs/plan-entrega.md)
+- [Matriz de cumplimiento y pruebas de aceptación](docs/matriz-cumplimiento.md)
+- [Circuito comercial y manual](docs/circuito-comercial.md)
+
+Esta versión requiere la migración `006_circuito_comercial.sql` además de las anteriores. El carrito registra el pedido antes del pago. Las entregas se registran desde Circuito comercial, y el correo del sector de ventas se configura en base de datos desde Administración.

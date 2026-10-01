@@ -37,7 +37,7 @@ from modulos.esquemas import (
 
 # ---- Crear nuevo usuario común ---- ANDA
 @router.post("/ingresar")
-async def ingresar_usuario(data: Usuarios_comunes):
+def ingresar_usuario(data: Usuarios_comunes):
     """
     Recibe los datos de un usuario común y lo crea en la base de datos.
     """
@@ -47,7 +47,7 @@ async def ingresar_usuario(data: Usuarios_comunes):
 
 # ---- Obtener todos los usuarios comunes ----
 @router.get("/obtener", dependencies=[Depends(require_admin)])
-async def retornar_usuario():
+def retornar_usuario():
     """
     Devuelve la lista de todos los usuarios comunes.
     """
@@ -57,17 +57,18 @@ async def retornar_usuario():
 
 # ---- Eliminar usuario común por ID ----
 @router.post("/eliminar", dependencies=[Depends(require_admin)])
-async def eliminar_usuario(data: Usuarios_comunes_id):
+def eliminar_usuario(data: Usuarios_comunes_id, admin=Depends(require_admin)):
     """
     Elimina un usuario común dado su ID.
     """
-    res = eliminarUsuario(data)
+    from modulos.papelera import cambiar
+    res = cambiar("usuarios", data.uc_id, "Baja desde endpoint compatible", admin)
     return res
 
 
 # ---- Obtener usuario común por ID ----
 @router.post("/obtenerId", dependencies=[Depends(require_admin)])
-async def retornarPorID_usuario(data: Usuarios_comunes_id):
+def retornarPorID_usuario(data: Usuarios_comunes_id):
     """
     Devuelve los datos de un usuario común específico por ID.
     """
@@ -76,7 +77,7 @@ async def retornarPorID_usuario(data: Usuarios_comunes_id):
 
 
 @router.post("/validarContrasena")
-async def retornarValidacion(data: Validacion_de_usuarios):
+def retornarValidacion(data: Validacion_de_usuarios):
     """
     Devuelve la validacion en formato booleano de si existe o no el usuario.
     """
@@ -98,4 +99,4 @@ def buyer_logout(authorization: str=Header(default=''), user_id=Depends(compras.
 @router.get('/mis-pedidos')
 def my_orders(user_id=Depends(compras.require_buyer)):
     from modulos.gestion import query
-    return query('SELECT id,creado_en,estado,total,items FROM pedidos WHERE uc_id=%s ORDER BY creado_en DESC LIMIT 200',(user_id,))
+    return query('SELECT id,creado_en,estado,estado_gestion,total,moneda,items,version,checkout_iniciado,preferencia_id,anulado_en FROM pedidos WHERE uc_id=%s AND eliminado_en IS NULL ORDER BY creado_en DESC LIMIT 200',(user_id,))

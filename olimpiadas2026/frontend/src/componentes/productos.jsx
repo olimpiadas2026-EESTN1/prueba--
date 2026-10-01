@@ -1,0 +1,8 @@
+import { useContext, useEffect, useState } from 'react';
+import { API_URL,apiFetch } from '../api';
+import { AuthContext } from '../AuthContext';
+export default function Productos(){
+ const [items,setItems]=useState([]),[error,setError]=useState(''),[loading,setLoading]=useState(true),[message,setMessage]=useState('');const {setListaCarrito}=useContext(AuthContext);
+ useEffect(()=>{let active=true;Promise.all(['/viajes/obtener','/paqueteDeViajes/obtener'].map(p=>apiFetch(API_URL+p).then(r=>r.json()))).then(([v,p])=>{if(active)setItems([...v.map(i=>({...i,tipoProducto:'viaje'})),...p.flat().map(i=>({...i,tipoProducto:'paquete'}))]);}).catch(e=>{if(active)setError(e.message);}).finally(()=>{if(active)setLoading(false);});return()=>{active=false;};},[]);
+ return <section className="mis-pedidos"><h1>Lista de productos</h1><p>Precios en pesos argentinos.</p>{error&&<p role="alert">{error}</p>}{loading&&<p role="status">Cargando…</p>}{message&&<p role="status">{message}</p>}<div style={{overflowX:'auto'}}><table><thead><tr><th>Código</th><th>Descripción</th><th>Precio unitario</th><th>Cupos</th><th>Acción</th></tr></thead><tbody>{items.map(i=><tr key={`${i.tipoProducto}-${i.Codigo}`}><td>{i.tipoProducto} {i.Codigo}</td><td>{i.Nombre||i.Destino} — {i.Descripcion}</td><td>{new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS'}).format(i.Precio)}</td><td>{i.Cupos}</td><td><button disabled={i.Cupos<1||i.Estado!=='Disponible'} onClick={()=>{setListaCarrito(old=>[...old,i]);setMessage('Producto agregado al carrito.');}}>Agregar</button></td></tr>)}</tbody></table></div></section>;
+}
