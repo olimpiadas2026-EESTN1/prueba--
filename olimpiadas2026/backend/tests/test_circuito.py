@@ -26,6 +26,23 @@ class CircuitoTests(unittest.TestCase):
         items=[SimpleNamespace(tipo='viaje',id=1,quantity=2,unit_price=1)]
         self.assertEqual(circuito.cotizar(cur,items)[1],200)
         with self.assertRaises(HTTPException): circuito.cotizar(cur,[SimpleNamespace(tipo='viaje',id=1,quantity=30)]*2)
+    def test_auto_quote_uses_server_daily_price_and_dates(self):
+        from datetime import date
+        cur=MagicMock();cur.fetchone.side_effect=[{'modelo':'Sedan','disponibles':3,'precio_por_dia':100},{'reservados':1}]
+        item=SimpleNamespace(tipo='auto',id=4,quantity=2,fecha_retiro=date(2026,10,5),fecha_devolucion=date(2026,10,8))
+        snapshot,total=circuito.cotizar(cur,[item])
+        self.assertEqual(total,600)
+        self.assertEqual(snapshot[0]['unit_price'],300)
+        self.assertEqual(snapshot[0]['precio_diario'],100)
+        self.assertEqual(snapshot[0]['fecha_retiro'],'2026-10-05')
+        self.assertEqual(snapshot[0]['fecha_devolucion'],'2026-10-08')
+    def test_auto_quote_requires_dates_and_availability(self):
+        from datetime import date
+        with self.assertRaises(HTTPException): circuito.cotizar(MagicMock(),[SimpleNamespace(tipo='auto',id=4,quantity=1)])
+        cur=MagicMock();cur.fetchone.side_effect=[{'modelo':'Sedan','disponibles':1,'precio_por_dia':100},{'reservados':1}]
+        item=SimpleNamespace(tipo='auto',id=4,quantity=1,fecha_retiro=date(2026,10,5),fecha_devolucion=date(2026,10,6))
+        with self.assertRaises(HTTPException) as error: circuito.cotizar(cur,[item])
+        self.assertEqual(error.exception.status_code,409)
     def test_edit_conflict(self):
         conn,cur=self.db();cur.fetchone.return_value=self.order()
         with patch.object(circuito,'connection',return_value=conn),self.assertRaises(HTTPException) as e:

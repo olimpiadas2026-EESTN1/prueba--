@@ -1,6 +1,7 @@
 """Operaciones del comprador y de ventas, con permisos separados."""
 from uuid import UUID
-from typing import Literal, List
+from datetime import date
+from typing import Literal, List, Optional
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 from modulos.compras import require_buyer
@@ -10,9 +11,11 @@ from modulos.gestion import query
 
 router=APIRouter(tags=['Circuito comercial'])
 class Articulo(BaseModel):
-    tipo: Literal['viaje','paquete']
+    tipo: Literal['viaje','paquete','auto']
     id: int = Field(gt=0)
     quantity: int = Field(gt=0,le=50)
+    fecha_retiro: Optional[date] = None
+    fecha_devolucion: Optional[date] = None
 class Pedido(BaseModel):
     items: List[Articulo] = Field(min_length=1,max_length=100)
 class Edicion(Pedido):

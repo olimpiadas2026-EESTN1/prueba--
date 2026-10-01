@@ -14,6 +14,10 @@
 .auto-price { font-size: 1.65rem; font-weight: 700; margin-bottom: .75rem; }
 .auto-price span { font-size: .95rem; font-weight: 400; }
 .auto-demo { color: #5d6875; font-size: .9rem; margin-top: 1rem; }
+.auto-add { width: 100%; min-height: 44px; margin-top: 1rem; padding: .7rem 1rem; border: 0; border-radius: 6px; background: #176b55; color: white; font: inherit; font-weight: 700; cursor: pointer; }
+.auto-add:hover:not(:disabled) { background: #105640; }
+.auto-add:disabled { background: #89969c; cursor: not-allowed; }
+.autos-cart-message { color: #176b55; font-weight: 700; }
 .autos-info { margin-top: 2rem; padding: 1.5rem; background: #edf4f9; border-radius: 14px; }
 .autos-info h2 { font-size: 1.25rem; margin-bottom: .75rem; }
 .autos-info a { display: inline-block; margin: 1rem 1.5rem 0 0; color: #175a8e; font-weight: 700; }

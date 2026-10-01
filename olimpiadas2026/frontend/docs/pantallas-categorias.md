@@ -58,6 +58,6 @@ Limitaciones previas: los formularios decorativos de la portada no implementan t
 
 La ruta `/autos` se accede desde la navegación principal y el pie de página. Consulta `/autos/obtener` y muestra modelo, código, precio diario en ARS y unidades disponibles. Permite búsqueda por texto del modelo, orden por modelo o precio, y filtro de disponibilidad. Incluye estados de carga, error con reintento y lista vacía, además de diseño adaptable a celular.
 
-Los registros DEMO se identifican como demostración. La pantalla no agrega autos al carrito: el checkout actual solo admite viajes y paquetes. Se explica que los autos se ofrecen como componentes vinculados y se enlaza a paquetes y vuelos. La reserva individual requiere un desarrollo separado.
+Los registros DEMO se identifican como demostración. Cada auto disponible se puede agregar al carrito como alquiler por día; se guarda la tarifa diaria y no se duplica el mismo auto. Al confirmar el pedido se solicitan las fechas de retiro y devolución, y el backend calcula el total y valida la disponibilidad. El alquiler queda reservado cuando el pago se confirma. Se mantienen los enlaces a paquetes y vuelos.
 
-Verificación: compilación de producción del frontend correcta. Prueba visual pendiente en el navegador del usuario.
+Verificación: compilación de producción del frontend y suite del backend correctas; catálogo y cotización de alquiler verificados contra la base configurada.

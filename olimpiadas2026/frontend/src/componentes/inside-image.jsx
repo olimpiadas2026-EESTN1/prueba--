@@ -12,6 +12,9 @@ const Inside = ({ showHero = true }) => {
     useContext(AuthContext);
 
   const [precioTotal, setPrecioTotal] = useState(0);
+  const [alquilerDiarioTotal, setAlquilerDiarioTotal] = useState(0);
+  const [fechaRetiro, setFechaRetiro] = useState('');
+  const [fechaDevolucion, setFechaDevolucion] = useState('');
 
   const { listaCarrito, setListaCarrito } =
     useContext(AuthContext);
@@ -23,6 +26,13 @@ const Inside = ({ showHero = true }) => {
 
   const [mostrarCarrito, setMostrarCarrito] =
     useState(false);
+
+  const hoy = new Date();
+  hoy.setMinutes(hoy.getMinutes() - hoy.getTimezoneOffset());
+  const fechaMinima = hoy.toISOString().slice(0, 10);
+  const diasAlquiler = fechaRetiro && fechaDevolucion
+    ? Math.max(0, (Date.parse(`${fechaDevolucion}T00:00:00Z`) - Date.parse(`${fechaRetiro}T00:00:00Z`)) / 86400000)
+    : 0;
 
 
   const { isLoggedIn, setIsLoggedIn } =
@@ -143,13 +153,10 @@ const Inside = ({ showHero = true }) => {
 
   useEffect(() => {
 
-    const total = listaCarrito.reduce(
-      (acc, vuelo) =>
-        acc + parseInt(vuelo.Precio),
-      0
-    );
-
-    setPrecioTotal(total);
+    const items = listaCarrito.filter(item => item.tipoProducto !== 'auto');
+    const alquileres = listaCarrito.filter(item => item.tipoProducto === 'auto');
+    setPrecioTotal(items.reduce((total, item) => total + Number(item.Precio || 0), 0));
+    setAlquilerDiarioTotal(alquileres.reduce((total, item) => total + Number(item.Precio || 0), 0));
 
   }, [listaCarrito]);
 
@@ -159,7 +166,6 @@ const Inside = ({ showHero = true }) => {
   // =========================================================
 
   const handleComprar = () => {
-
     document.body.style.overflow = "hidden";
 
     setMostarPaginaCompra(true);
@@ -190,11 +196,15 @@ const Inside = ({ showHero = true }) => {
     if(guardandoPedido)return;
     if(!sessionStorage.getItem('buyer_token')){alert('Iniciá sesión para registrar el pedido.');return;}
     if(!listaCarrito.length){alert('Tu carrito está vacío.');return;}
+    if(listaCarrito.some(item=>item.tipoProducto==='auto')&&(!fechaRetiro||!fechaDevolucion||diasAlquiler<1)){alert('Elegí fechas válidas de retiro y devolución para el alquiler.');return;}
     setGuardandoPedido(true);
     try {
-      const items=listaCarrito.map(item=>({id:Number(item.Codigo||item.id),tipo:item.tipoProducto||(item.Transporte?'viaje':'paquete'),quantity:1}));
+      const items=listaCarrito.map(item=>{
+        const tipo=item.tipoProducto||(item.Transporte?'viaje':'paquete');
+        return {id:Number(item.Codigo||item.id),tipo,quantity:1,...(tipo==='auto'?{fecha_retiro:fechaRetiro,fecha_devolucion:fechaDevolucion}:{})};
+      });
       await apiFetch(`${API_URL}/clientes/pedidos`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${sessionStorage.getItem('buyer_token')}`},body:JSON.stringify({items})});
-      setListaCarrito([]);setMostarPaginaCompra(false);setMostrarCarrito(false);navigate('/mis-pedidos');
+      document.body.style.overflow='auto';setListaCarrito([]);setMostarPaginaCompra(false);setMostrarCarrito(false);navigate('/mis-pedidos');
     }catch(error){alert(error.message);}finally{setGuardandoPedido(false);}
   };
 
@@ -840,30 +850,27 @@ const Inside = ({ showHero = true }) => {
                 >
 
                   <h1 className="titulo-carrito">
-                    {vuelo.Destino}
+                    {vuelo.Destino || vuelo.modelo}
                   </h1>
 
 
                   {eleccionMoneda === "ARS" ? (
 
                     <p className="parrafo_carrito">
-                      ${vuelo.Precio.toLocaleString()}ARS
+                      ${Number(vuelo.Precio || vuelo['precio por dia']).toLocaleString()}ARS{vuelo.tipoProducto === 'auto' ? ' / día' : ''}
                     </p>
 
                   ) : (
 
                     <p className="parrafo_carrito">
-                      ${parseInt(
-                        vuelo.Precio /
-                        precio
-                      )}USD
+                        ${parseInt(Number(vuelo.Precio || vuelo['precio por dia']) / precio)}USD{vuelo.tipoProducto === 'auto' ? ' / día' : ''}
                     </p>
 
                   )}
 
 
                   <p className="parrafo_carrito">
-                    {vuelo.Descripcion}
+                    {vuelo.Descripcion || (vuelo.tipoProducto === 'auto' ? 'Alquiler por día' : '')}
                   </p>
 
 
@@ -880,9 +887,10 @@ const Inside = ({ showHero = true }) => {
               <div>
 
                 <p className="tet">
-                  Total: ${precioTotal}
+                  Total de viajes y paquetes: ${precioTotal.toLocaleString()}
                 </p>
 
+                {alquilerDiarioTotal > 0 && <p className="tet">Alquileres: ${alquilerDiarioTotal.toLocaleString()} por día</p>}
 
                 <button
                   className="boton-compra"
@@ -989,9 +997,17 @@ const Inside = ({ showHero = true }) => {
 
             <p>Primero registrá el pedido. Después podrás revisarlo y elegir el medio de pago en Mercado Pago desde Mis pedidos.</p>
 
+            {listaCarrito.some(item => item.tipoProducto === 'auto') && <div className="fechas-alquiler">
+              <label>Fecha de retiro<input type="date" required min={fechaMinima} value={fechaRetiro} onChange={event => { setFechaRetiro(event.target.value); if (fechaDevolucion && fechaDevolucion <= event.target.value) setFechaDevolucion(''); }} /></label>
+              <label>Fecha de devolución<input type="date" required min={fechaRetiro ? new Date(Date.parse(`${fechaRetiro}T00:00:00Z`) + 86400000).toISOString().slice(0, 10) : undefined} value={fechaDevolucion} onChange={event => setFechaDevolucion(event.target.value)} /></label>
+              {diasAlquiler > 0 && <p>{diasAlquiler} {diasAlquiler === 1 ? 'día' : 'días'} de alquiler</p>}
+            </div>}
+
             <h2>
-              Total del pedido: ${precioTotal}
+              Total del pedido: ${new Intl.NumberFormat('es-AR').format(precioTotal + alquilerDiarioTotal * diasAlquiler)}
             </h2>
+
+            {alquilerDiarioTotal > 0 && <p>Alquileres: ${alquilerDiarioTotal.toLocaleString()} por día</p>}
 
 
             <button

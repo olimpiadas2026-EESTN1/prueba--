@@ -1359,6 +1359,30 @@ color:black
   max-height: 700px;
 overflow-y: auto;
 }
+.fechas-alquiler {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .75rem;
+  margin: .75rem 0 1rem;
+}
+.fechas-alquiler label {
+  display: grid;
+  gap: .35rem;
+  text-align: left;
+  font-weight: 600;
+}
+.fechas-alquiler input {
+  width: 100%;
+  min-width: 0;
+  padding: .65rem;
+}
+.fechas-alquiler p {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+@media (max-width: 520px) {
+  .fechas-alquiler { grid-template-columns: minmax(0, 1fr); }
+}
 .titulo-carrito {
   font-size: 1.2rem;
   font-weight: 600;

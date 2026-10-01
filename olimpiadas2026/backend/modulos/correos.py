@@ -11,7 +11,10 @@ def compose(order, name, payment_id, live_mode):
     lines = [f'Hola {name},', '', 'Tu compra fue confirmada.', f'Pedido: {order["id"]}', f'Pago de Mercado Pago: {payment_id}', '']
     if not live_mode: lines += ['Esta es una compra de prueba, sin validez como reserva real.', '']
     for item in order['items']:
-        lines.append(f'{item["title"]} — {item["quantity"]} x ARS {item["unit_price"]:.2f}')
+        if item.get('tipo')=='auto':
+            lines.append(f'{item["title"]} — {item["quantity"]} vehículo(s), del {item["fecha_retiro"]} al {item["fecha_devolucion"]}; ARS {item["precio_diario"]:.2f} por día')
+        else:
+            lines.append(f'{item["title"]} — {item["quantity"]} x ARS {item["unit_price"]:.2f}')
     lines += ['', f'Total: ARS {order["total"]}', '', 'Gracias por elegir AirTrip.', 'Este comprobante no reemplaza una factura fiscal.']
     return subject, '\n'.join(lines)
 

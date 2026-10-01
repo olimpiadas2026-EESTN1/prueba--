@@ -1,5 +1,6 @@
 """Pedidos editables, entrega, solicitudes y cuenta corriente interna."""
 from collections import defaultdict
+from datetime import date
 from decimal import Decimal
 from uuid import uuid4
 from fastapi import HTTPException
@@ -12,17 +13,41 @@ from modulos.gestion import connection, query
 def cotizar(cur, items):
     if not items or len(items)>100: raise HTTPException(422,'Seleccioná entre 1 y 100 artículos')
     cantidades=defaultdict(int)
-    for item in items: cantidades[(item.tipo,item.id)]+=item.quantity
+    for item in items:
+        pickup=getattr(item,'fecha_retiro',None)
+        dropoff=getattr(item,'fecha_devolucion',None)
+        try:
+            if isinstance(pickup,str): pickup=date.fromisoformat(pickup)
+            if isinstance(dropoff,str): dropoff=date.fromisoformat(dropoff)
+        except ValueError: raise HTTPException(422,'Ingresá fechas válidas de retiro y devolución para cada alquiler')
+        if item.tipo=='auto':
+            if not pickup or not dropoff or pickup<date.today() or dropoff<=pickup: raise HTTPException(422,'Ingresá fechas futuras válidas de retiro y devolución para cada alquiler')
+        elif pickup or dropoff:
+            raise HTTPException(422,'Las fechas de alquiler solo corresponden a autos')
+        cantidades[(item.tipo,item.id,pickup,dropoff)]+=item.quantity
     snapshot=[]; total=Decimal('0')
-    for (tipo,code),cantidad in sorted(cantidades.items()):
+    for (tipo,code,pickup,dropoff),cantidad in sorted(cantidades.items(),key=lambda row:(row[0][0],row[0][1],row[0][2] or '',row[0][3] or '')):
         if cantidad<1 or cantidad>50: raise HTTPException(422,'Máximo 50 unidades por producto')
-        table={'viaje':'viaje_simple','paquete':'paquete_de_viajes'}[tipo]
-        cur.execute(sql.SQL('SELECT nombre,precio,cupos,estado FROM {} WHERE codigo=%s AND eliminado_en IS NULL').format(sql.Identifier(table)),(code,))
-        p=cur.fetchone()
-        if not p or p['cupos']<cantidad or p['estado']!='Disponible': raise HTTPException(409,'Producto no disponible o sin cupos suficientes')
-        precio=Decimal(str(p['precio']))
+        if tipo=='auto':
+            cur.execute('SELECT modelo,disponibles,precio_por_dia FROM auto WHERE auto_id=%s AND eliminado_en IS NULL',(code,))
+            p=cur.fetchone()
+            if not p or p['disponibles']<1: raise HTTPException(409,'Auto no disponible')
+            cur.execute('SELECT COALESCE(SUM(cantidad),0) AS reservados FROM alquileres_auto WHERE auto_id=%s AND fecha_retiro<%s AND fecha_devolucion>%s',(code,dropoff,pickup))
+            reserved=cur.fetchone()['reservados']
+            if reserved+cantidad>p['disponibles']: raise HTTPException(409,'El auto no tiene disponibilidad para esas fechas')
+            daily_price=Decimal(str(p['precio_por_dia']))
+            precio=daily_price*(dropoff-pickup).days
+            name=p['modelo']
+        else:
+            table={'viaje':'viaje_simple','paquete':'paquete_de_viajes'}[tipo]
+            cur.execute(sql.SQL('SELECT nombre,precio,cupos,estado FROM {} WHERE codigo=%s AND eliminado_en IS NULL').format(sql.Identifier(table)),(code,))
+            p=cur.fetchone()
+            if not p or p['cupos']<cantidad or p['estado']!='Disponible': raise HTTPException(409,'Producto no disponible o sin cupos suficientes')
+            precio=Decimal(str(p['precio']))
+            daily_price=None
+            name=p['nombre']
         if not precio.is_finite() or precio<=0: raise HTTPException(409,'Precio inválido')
-        snapshot.append({'tipo':tipo,'id':code,'title':p['nombre'],'unit_price':float(precio),'quantity':cantidad})
+        snapshot.append({'tipo':tipo,'id':code,'title':name,'unit_price':float(precio),'quantity':cantidad,**({'fecha_retiro':pickup.isoformat(),'fecha_devolucion':dropoff.isoformat(),'precio_diario':float(daily_price)} if tipo=='auto' else {})})
         total+=precio*cantidad
     return snapshot,total
 
@@ -164,11 +189,11 @@ def pagar(order_id,user_id,sdk):
             editable(order)
             # Verificar disponibilidad sin cambiar el precio acordado del pedido.
             from types import SimpleNamespace
-            cotizar(cur,[SimpleNamespace(tipo=i['tipo'],id=i['id'],quantity=i['quantity']) for i in order['items']])
+            cotizar(cur,[SimpleNamespace(tipo=i['tipo'],id=i['id'],quantity=i['quantity'],fecha_retiro=i.get('fecha_retiro'),fecha_devolucion=i.get('fecha_devolucion')) for i in order['items']])
             cur.execute('UPDATE pedidos SET checkout_iniciado=true,version=version+1 WHERE id=%s',(order_id,))
     try:
         base=(os.getenv('FRONTEND_URL') or 'http://localhost:5173').rstrip('/')
-        pref={'external_reference':str(order_id),'items':[{k:v for k,v in i.items() if k not in ('tipo','id')}|{'id':f"{i['tipo']}:{i['id']}",'currency_id':'ARS'} for i in order['items']], 'back_urls':{k:base+'/mis-pedidos' for k in ('success','failure','pending')}}
+        pref={'external_reference':str(order_id),'items':[{'title':i['title'],'quantity':i['quantity'],'unit_price':i['unit_price'],'id':f"{i['tipo']}:{i['id']}",'currency_id':'ARS'} for i in order['items']], 'back_urls':{k:base+'/mis-pedidos' for k in ('success','failure','pending')}}
         url=os.getenv('MERCADOPAGO_WEBHOOK_URL','').strip()
         if url:
             if not url.startswith('https://'): raise ValueError('Webhook inválido')

@@ -17,7 +17,7 @@ export default function MisPedidos(){
  async function save(e){e.preventDefault();setBusy(true);setError('');const f=new FormData(e.currentTarget);try{
   const base=`/clientes/pedidos/${action.order.id}`;
   if(action.type==='editar'){
-   const items=action.order.items.map((i,n)=>({id:i.id,tipo:i.tipo,quantity:Number(f.get(`q${n}`))})).filter(i=>i.quantity>0);
+    const items=action.order.items.map((i,n)=>({id:i.id,tipo:i.tipo,quantity:Number(f.get(`q${n}`)),...(i.tipo==='auto'?{fecha_retiro:i.fecha_retiro,fecha_devolucion:i.fecha_devolucion}:{})})).filter(i=>i.quantity>0);
    if(!items.length)throw new Error('Para quitar todos los artículos, usá Anular pedido.');
    await call(base,{method:'PATCH',body:JSON.stringify({items,version:action.order.version})});
   }else if(action.type==='anular')await call(base+'/anular',{method:'POST',body:JSON.stringify({motivo:f.get('detalle')})});
@@ -29,7 +29,7 @@ export default function MisPedidos(){
  {!token?<p><Link to="/login">Iniciá sesión</Link> para consultar tus pedidos.</p>:<>
  <button disabled={busy} onClick={()=>setVersion(v=>v+1)}>Actualizar pedidos</button><label> Mostrar <select value={filter} onChange={e=>setFilter(e.target.value)}><option value="pendientes">Pendientes de entrega</option><option value="entregados">Entregados</option><option value="anulados">Anulados</option><option value="todos">Todos</option></select></label>
  {error&&<p role="alert">{error}</p>}{!orders&&!error&&<p role="status">Cargando pedidos…</p>}{visible?.length===0&&<p>No hay pedidos en esta vista. <Link to="/productos">Ver lista de productos</Link></p>}
- {visible?.map(order=><article key={order.id}><h2>Pedido {order.id}</h2><p>{new Date(order.creado_en).toLocaleString('es-AR')}</p><p><strong>Pago:</strong> {labels[order.estado]||order.estado}</p><p><strong>Gestión:</strong> {order.anulado_en?'Anulado':labels[order.estado_gestion]||order.estado_gestion}</p><ul>{order.items.map((item,i)=><li key={i}>{item.title} × {item.quantity}</li>)}</ul><strong>{new Intl.NumberFormat('es-AR',{style:'currency',currency:order.moneda||'ARS'}).format(order.total)}</strong>
+ {visible?.map(order=><article key={order.id}><h2>Pedido {order.id}</h2><p>{new Date(order.creado_en).toLocaleString('es-AR')}</p><p><strong>Pago:</strong> {labels[order.estado]||order.estado}</p><p><strong>Gestión:</strong> {order.anulado_en?'Anulado':labels[order.estado_gestion]||order.estado_gestion}</p><ul>{order.items.map((item,i)=><li key={i}>{item.title} × {item.quantity}{item.tipo==='auto'&&item.fecha_retiro&&item.fecha_devolucion?<span> · Retiro {item.fecha_retiro} · devolución {item.fecha_devolucion} · {new Intl.NumberFormat('es-AR',{style:'currency',currency:order.moneda||'ARS'}).format(item.precio_diario)} por día</span>:null}</li>)}</ul><strong>{new Intl.NumberFormat('es-AR',{style:'currency',currency:order.moneda||'ARS'}).format(order.total)}</strong>
  {!order.anulado_en&&order.estado_gestion!=='completado'&&<div>
  {order.estado!=='confirmado'&&<button disabled={busy||order.estado==='error_checkout'} onClick={()=>pay(order)}>Pagar con Mercado Pago</button>}
  {!order.checkout_iniciado&&['pendiente','en_revision'].includes(order.estado_gestion)?<><button disabled={busy} onClick={()=>setAction({order,type:'editar'})}>Modificar cantidades</button><button disabled={busy} onClick={()=>setAction({order,type:'anular'})}>Anular pedido</button></>:<button disabled={busy} onClick={()=>setAction({order,type:'solicitar'})}>Solicitar cambio o anulación</button>}

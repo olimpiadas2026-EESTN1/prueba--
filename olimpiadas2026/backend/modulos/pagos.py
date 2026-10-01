@@ -48,7 +48,16 @@ def process_payment(payment_id,sdk):
             cur.execute('LOCK TABLE ventas IN SHARE ROW EXCLUSIVE MODE')
             cur.execute('SELECT COALESCE(MAX(vtas_id),0)+1 AS id FROM ventas')
             sale_id=cur.fetchone()['id']
-            for item in sorted(order['items'],key=lambda i:(i['tipo'],i['id'])):
+            for renglon,item in enumerate(sorted(order['items'],key=lambda i:(i['tipo'],i['id'],i.get('fecha_retiro',''),i.get('fecha_devolucion',''))),start=1):
+                if item['tipo']=='auto':
+                    cur.execute('SELECT disponibles FROM auto WHERE auto_id=%s AND eliminado_en IS NULL FOR UPDATE',(item['id'],))
+                    auto=cur.fetchone()
+                    if not auto: raise HTTPException(409,'El auto ya no está disponible: requiere revisión administrativa')
+                    cur.execute('SELECT COALESCE(SUM(cantidad),0) AS reservados FROM alquileres_auto WHERE auto_id=%s AND fecha_retiro<%s AND fecha_devolucion>%s',(item['id'],item['fecha_devolucion'],item['fecha_retiro']))
+                    if cur.fetchone()['reservados']+item['quantity']>auto['disponibles']:
+                        raise HTTPException(409,'El auto ya no tiene disponibilidad para esas fechas: requiere revisión administrativa')
+                    cur.execute('INSERT INTO alquileres_auto(pedido_id,renglon,auto_id,fecha_retiro,fecha_devolucion,cantidad,precio_diario) VALUES(%s,%s,%s,%s,%s,%s,%s)',(order_id,renglon,item['id'],item['fecha_retiro'],item['fecha_devolucion'],item['quantity'],item['precio_diario']))
+                    continue
                 table={'viaje':'viaje_simple','paquete':'paquete_de_viajes'}[item['tipo']]
                 cur.execute(sql.SQL("UPDATE {} SET cupos=cupos-%s,estado=CASE WHEN cupos-%s=0 THEN 'No disponible' ELSE estado END WHERE codigo=%s AND cupos>=%s RETURNING codigo").format(sql.Identifier(table)),(item['quantity'],item['quantity'],item['id'],item['quantity']))
                 if not cur.fetchone(): raise HTTPException(409,'Pago recibido sin cupos suficientes: requiere revisión administrativa')
