@@ -1,24 +1,6 @@
-
-# ===============================
-#       Configuración de correo
-# ===============================
-
 import os
-from pathlib import Path
 
-from dotenv import load_dotenv
 import resend
-
-
-# ===============================
-#       Cargar .env
-# ===============================
-
-BASE_DIR = Path(__file__).resolve().parents[2]
-
-ENV_FILE = BASE_DIR / ".env"
-
-load_dotenv(ENV_FILE)
 
 
 # ===============================
@@ -42,9 +24,7 @@ async def enviar_correo(
     asunto: str,
     cuerpo: str
 ):
-
     try:
-
         params = {
             "from": "onboarding@resend.dev",
             "to": [destinatario],
@@ -61,11 +41,9 @@ async def enviar_correo(
         return resultado
 
     except Exception as e:
-
         print(
             f"ERROR ENVIANDO CORREO: {e}"
         )
-
         raise
 
 
@@ -77,13 +55,9 @@ async def enviar_correo_registro(
     email_usuario: str,
     nombre_usuario: str
 ):
-
     await enviar_correo(
-
         destinatario=email_usuario,
-
         asunto="Registro exitoso - Olimpiadas 2026",
-
         cuerpo=f"""
 Hola {nombre_usuario}.
 
@@ -101,7 +75,6 @@ Olimpiadas 2026
 
 # ===============================
 #       CORREO DE COMPRA
-#       AL USUARIO
 # ===============================
 
 async def enviar_correo_compra(
@@ -110,13 +83,9 @@ async def enviar_correo_compra(
     id_compra: str,
     monto: float
 ):
-
     await enviar_correo(
-
         destinatario=email_usuario,
-
         asunto="Pago confirmado - Olimpiadas 2026",
-
         cuerpo=f"""
 Hola {nombre_usuario}.
 
@@ -138,8 +107,7 @@ Olimpiadas 2026
 
 
 # ===============================
-#       CORREO DE COMPRA
-#       AL ADMINISTRADOR
+#       CORREO AL ADMIN
 # ===============================
 
 async def enviar_correo_admin(
@@ -147,25 +115,15 @@ async def enviar_correo_admin(
     email_comprador: str,
     monto: float
 ):
-
-    admin_email = os.getenv(
-        "ADMIN_EMAIL"
-    )
+    admin_email = os.getenv("ADMIN_EMAIL")
 
     if not admin_email:
-
-        print(
-            "ADMIN_EMAIL no está configurado"
-        )
-
+        print("ADMIN_EMAIL no está configurado")
         return
 
     await enviar_correo(
-
         destinatario=admin_email,
-
         asunto="Nueva compra confirmada - Olimpiadas 2026",
-
         cuerpo=f"""
 Se confirmó una nueva compra.
 
@@ -183,4 +141,3 @@ Mercado Pago confirmó el pago.
 Olimpiadas 2026
 """
     )
-
