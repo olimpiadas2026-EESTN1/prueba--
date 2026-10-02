@@ -8,7 +8,7 @@ from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(os.getenv('APP_ROOT', Path(__file__).resolve().parents[1]))
 
 
 def secret_path(variable, default):
