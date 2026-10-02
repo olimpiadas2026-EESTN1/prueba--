@@ -201,6 +201,22 @@ app.include_router(
 # HEALTH CHECK
 # ============================================================
 
+@app.get("/")
+def root():
+
+    return {
+
+        "status": "ok",
+
+        "servicio": "AirTrip API",
+
+        "health": "/health",
+
+        "documentacion": "/docs"
+
+    }
+
+
 @app.get("/health")
 def health_check():
 
