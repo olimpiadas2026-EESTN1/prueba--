@@ -3,7 +3,6 @@
 # ===============================
 
 import os
-from pathlib import Path
 
 from dotenv import load_dotenv
 
@@ -18,11 +17,7 @@ from fastapi_mail import (
 #       Cargar .env
 # ===============================
 
-BASE_DIR = Path(__file__).resolve().parents[2]
-
-ENV_FILE = BASE_DIR / ".env"
-
-load_dotenv(ENV_FILE)
+load_dotenv()
 
 
 # ===============================
@@ -30,11 +25,14 @@ load_dotenv(ENV_FILE)
 # ===============================
 
 def crear_configuracion():
+    usuario = os.getenv("MAIL_USERNAME") or os.getenv("GMAIL_USER")
+    # Gmail exige que el remitente coincida con la cuenta autenticada.
+    remitente = usuario
     valores = {
-        "MAIL_USERNAME": os.getenv("MAIL_USERNAME"),
-        "MAIL_PASSWORD": os.getenv("MAIL_PASSWORD"),
-        "MAIL_FROM": os.getenv("MAIL_FROM"),
-        "MAIL_SERVER": os.getenv("MAIL_SERVER"),
+        "MAIL_USERNAME": usuario,
+        "MAIL_PASSWORD": os.getenv("MAIL_PASSWORD") or os.getenv("GMAIL_APP_PASSWORD"),
+        "MAIL_FROM": remitente,
+        "MAIL_SERVER": os.getenv("MAIL_SERVER", "smtp.gmail.com"),
     }
 
     faltantes = [nombre for nombre, valor in valores.items() if not valor]
@@ -49,7 +47,8 @@ def crear_configuracion():
         MAIL_STARTTLS=True,
         MAIL_SSL_TLS=False,
         USE_CREDENTIALS=True,
-        VALIDATE_CERTS=True
+        VALIDATE_CERTS=True,
+        TIMEOUT=5
     )
 
 
@@ -156,9 +155,7 @@ async def enviar_correo_admin(
     monto: float
 ):
 
-    admin_email = os.getenv(
-        "ADMIN_EMAIL"
-    )
+    admin_email = os.getenv("ADMIN_EMAIL") or os.getenv("ADMIN_NOTIFICATION_EMAIL")
 
 
     if not admin_email:

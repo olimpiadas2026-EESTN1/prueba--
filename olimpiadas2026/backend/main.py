@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 from typing import List, Literal
 
 from roots.circuito import router as circuito_router
@@ -23,11 +22,7 @@ import psycopg
 # CONFIGURACIÓN
 # ============================================================
 
-BASE_DIR = Path(__file__).resolve().parents[2]
-
-ENV_FILE = BASE_DIR / ".env"
-
-load_dotenv(ENV_FILE)
+load_dotenv()
 
 app = FastAPI()
 
@@ -154,6 +149,10 @@ from roots.administradores import (
     router as admin_router
 )
 
+from roots.pagos import (
+    router as pagos_router
+)
+
 
 # ============================================================
 # REGISTRO DE ROUTERS
@@ -161,6 +160,10 @@ from roots.administradores import (
 
 app.include_router(
     admin_router
+)
+
+app.include_router(
+    pagos_router
 )
 
 app.include_router(
