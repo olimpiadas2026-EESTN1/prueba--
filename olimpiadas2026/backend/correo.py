@@ -9,11 +9,12 @@ import resend
 
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 
+print("RESEND_API_KEY EXISTE:", bool(RESEND_API_KEY))
+
 if not RESEND_API_KEY:
     raise RuntimeError("Falta la variable RESEND_API_KEY")
 
 resend.api_key = RESEND_API_KEY
-
 
 # ===============================
 #       Función general
