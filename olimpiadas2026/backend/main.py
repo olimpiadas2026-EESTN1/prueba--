@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from typing import List, Literal
 
+from roots.circuito import router as circuito_router
 from dotenv import load_dotenv
 
 from fastapi import (
@@ -154,6 +155,10 @@ from roots.administradores import (
 )
 
 
+# ============================================================
+# REGISTRO DE ROUTERS
+# ============================================================
+
 app.include_router(
     admin_router
 )
@@ -181,6 +186,14 @@ app.include_router(
 app.include_router(
     viajes_routers,
     prefix="/viajes"
+)
+
+# IMPORTANTE:
+# circuito.py ya define rutas como:
+# /clientes/pedidos
+# por eso NO usamos prefix="/clientes" acá.
+app.include_router(
+    circuito_router
 )
 
 
