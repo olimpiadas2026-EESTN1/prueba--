@@ -1,6 +1,6 @@
 import time
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, AsyncMock
 import bcrypt
 from fastapi.testclient import TestClient
 import main
@@ -35,6 +35,19 @@ class AdminTests(unittest.TestCase):
     def test_no_public_admin_login_alias(self):
         self.assertEqual(self.client.post('/clientes/validarContrasenaAdmin', json={}).status_code,404)
         self.assertEqual(self.client.get('/health').status_code,200)
+
+    def test_client_registration_awaits_async_service(self):
+        result = {'Mensaje': 'Usuario creado'}
+        with patch('roots.clientes.crearCliente', new_callable=AsyncMock, return_value=result) as create:
+            response = self.client.post('/clientes/ingresar', json={
+                'nombre': 'Prueba',
+                'apellido': 'Usuario',
+                'contraseña': 'clave-segura',
+                'correo_electronico': 'prueba@example.test',
+            })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), result)
+        create.assert_awaited_once()
 
 if __name__ == '__main__':
     unittest.main()
