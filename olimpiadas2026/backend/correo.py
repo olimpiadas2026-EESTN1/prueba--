@@ -1,55 +1,36 @@
+
 # ===============================
 #       Configuración de correo
 # ===============================
 
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
-
-from fastapi_mail import (
-    FastMail,
-    MessageSchema,
-    ConnectionConfig
-)
+import resend
 
 
 # ===============================
 #       Cargar .env
 # ===============================
 
-load_dotenv()
+BASE_DIR = Path(__file__).resolve().parents[2]
+
+ENV_FILE = BASE_DIR / ".env"
+
+load_dotenv(ENV_FILE)
 
 
 # ===============================
-#       Configuración SMTP
+#       Configuración Resend
 # ===============================
 
-def crear_configuracion():
-    usuario = os.getenv("MAIL_USERNAME") or os.getenv("GMAIL_USER")
-    # Gmail exige que el remitente coincida con la cuenta autenticada.
-    remitente = usuario
-    valores = {
-        "MAIL_USERNAME": usuario,
-        "MAIL_PASSWORD": os.getenv("MAIL_PASSWORD") or os.getenv("GMAIL_APP_PASSWORD"),
-        "MAIL_FROM": remitente,
-        "MAIL_SERVER": os.getenv("MAIL_SERVER", "smtp.gmail.com"),
-    }
+RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 
-    faltantes = [nombre for nombre, valor in valores.items() if not valor]
-    if faltantes:
-        raise RuntimeError(
-            "Faltan variables de correo: " + ", ".join(faltantes)
-        )
+if not RESEND_API_KEY:
+    raise RuntimeError("Falta la variable RESEND_API_KEY")
 
-    return ConnectionConfig(
-        **valores,
-        MAIL_PORT=int(os.getenv("MAIL_PORT", "587")),
-        MAIL_STARTTLS=True,
-        MAIL_SSL_TLS=False,
-        USE_CREDENTIALS=True,
-        VALIDATE_CERTS=True,
-        TIMEOUT=5
-    )
+resend.api_key = RESEND_API_KEY
 
 
 # ===============================
@@ -62,18 +43,30 @@ async def enviar_correo(
     cuerpo: str
 ):
 
-    mensaje = MessageSchema(
-        subject=asunto,
-        recipients=[destinatario],
-        body=cuerpo,
-        subtype="plain"
-    )
+    try:
 
-    mail = FastMail(crear_configuracion())
+        params = {
+            "from": "onboarding@resend.dev",
+            "to": [destinatario],
+            "subject": asunto,
+            "text": cuerpo,
+        }
 
-    await mail.send_message(
-        mensaje
-    )
+        resultado = await resend.Emails.send_async(params)
+
+        print(
+            f"CORREO ENVIADO CORRECTAMENTE: {resultado}"
+        )
+
+        return resultado
+
+    except Exception as e:
+
+        print(
+            f"ERROR ENVIANDO CORREO: {e}"
+        )
+
+        raise
 
 
 # ===============================
@@ -155,8 +148,9 @@ async def enviar_correo_admin(
     monto: float
 ):
 
-    admin_email = os.getenv("ADMIN_EMAIL") or os.getenv("ADMIN_NOTIFICATION_EMAIL")
-
+    admin_email = os.getenv(
+        "ADMIN_EMAIL"
+    )
 
     if not admin_email:
 
@@ -165,7 +159,6 @@ async def enviar_correo_admin(
         )
 
         return
-
 
     await enviar_correo(
 
@@ -190,3 +183,4 @@ Mercado Pago confirmó el pago.
 Olimpiadas 2026
 """
     )
+
